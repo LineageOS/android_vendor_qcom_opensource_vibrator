@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -81,6 +81,15 @@ Return<Status> Vibrator::play(uint32_t timeoutMs) {
     int ret;
 
     if (timeoutMs != 0) {
+        if (mCurrAppId != -1) {
+            ret = TEMP_FAILURE_RETRY(ioctl(mVibraFd, EVIOCRMFF, mCurrAppId));
+            if (ret == -1) {
+                ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
+                goto errout;
+            }
+            mCurrAppId = -1;
+        }
+
         memset(&effect, 0, sizeof(effect));
         if (mCurrEffectId != -1) {
             data[0] = mCurrEffectId;
@@ -138,7 +147,7 @@ errout:
     mCurrAppId = -1;
     mCurrEffectId = -1;
     mPlayLengthMs = 0;
-    return Status::UNKNOWN_ERROR;
+    return Status::UNSUPPORTED_OPERATION;
 }
 
 Return<Status> Vibrator::on(uint32_t timeoutMs) {
@@ -160,6 +169,9 @@ Return<Status> Vibrator::setAmplitude(uint8_t amplitude) {
     if (!mSupportGain)
         return Status::UNSUPPORTED_OPERATION;
 
+    if (amplitude == 0)
+        return Status::BAD_VALUE;
+
     tmp = amplitude * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE) / 255;
     tmp += LIGHT_MAGNITUDE;
     ie.type = EV_FF;
@@ -169,7 +181,7 @@ Return<Status> Vibrator::setAmplitude(uint8_t amplitude) {
     ret = TEMP_FAILURE_RETRY(write(mVibraFd, &ie, sizeof(ie)));
     if (ret == -1) {
         ALOGE("write FF_GAIN failed, errno = %d", -errno);
-        return Status::UNKNOWN_ERROR;
+        return Status::UNSUPPORTED_OPERATION;
     }
 
     mCurrMagnitude = tmp;
@@ -200,7 +212,6 @@ static int16_t convertEffectStrength(EffectStrength es) {
 using Effect_1_0 = ::android::hardware::vibrator::V1_0::Effect;
 Return<void> Vibrator::perform(Effect_1_0 effect, EffectStrength es, perform_cb _hidl_cb) {
     Status status;
-    long timeout = 0;
 
     if (!mSupportEffects) {
         _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
@@ -209,19 +220,25 @@ Return<void> Vibrator::perform(Effect_1_0 effect, EffectStrength es, perform_cb 
 
     mCurrEffectId = static_cast<int16_t>(effect);
     mCurrMagnitude = convertEffectStrength(es);
+    if (mCurrEffectId < (static_cast<int16_t>(Effect_1_0::CLICK)) ||
+            mCurrEffectId > (static_cast<int16_t>(Effect_1_0::DOUBLE_CLICK)) ||
+            mCurrMagnitude == 0) {
+            _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
+            return Void();
+    }
 
     status = play(-1);
     if (status == Status::OK)
-        timeout = mPlayLengthMs;
+        _hidl_cb(Status::OK, mPlayLengthMs);
+    else
+        _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
 
-    _hidl_cb(status, timeout);
     return Void();
 }
 
 using Effect_1_1 = ::android::hardware::vibrator::V1_1::Effect_1_1;
 Return<void> Vibrator::perform_1_1(Effect_1_1 effect, EffectStrength es, perform_1_1_cb _hidl_cb) {
     Status status;
-    long timeout = 0;
 
     if (!mSupportEffects) {
         _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
@@ -230,19 +247,25 @@ Return<void> Vibrator::perform_1_1(Effect_1_1 effect, EffectStrength es, perform
 
     mCurrEffectId = static_cast<int16_t>(effect);
     mCurrMagnitude = convertEffectStrength(es);
+    if (mCurrEffectId < (static_cast<int16_t>(Effect_1_1::CLICK)) ||
+            mCurrEffectId > (static_cast<int16_t>(Effect_1_1::TICK)) ||
+            mCurrMagnitude == 0) {
+            _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
+            return Void();
+    }
 
     status = play(-1);
     if (status == Status::OK)
-        timeout = mPlayLengthMs;
+        _hidl_cb(Status::OK, mPlayLengthMs);
+    else
+        _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
 
-    _hidl_cb(status, timeout);
     return Void();
 }
 
 using Effect_1_2 = ::android::hardware::vibrator::V1_2::Effect;
 Return<void> Vibrator::perform_1_2(Effect_1_2 effect, EffectStrength es, perform_1_2_cb _hidl_cb) {
     Status status;
-    long timeout = 0;
 
     if (!mSupportEffects) {
         _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
@@ -251,12 +274,19 @@ Return<void> Vibrator::perform_1_2(Effect_1_2 effect, EffectStrength es, perform
 
     mCurrEffectId = static_cast<int16_t>(effect);
     mCurrMagnitude = convertEffectStrength(es);
+    if (mCurrEffectId < (static_cast<int16_t>(Effect_1_2::CLICK)) ||
+            mCurrEffectId > (static_cast<int16_t>(Effect_1_2::RINGTONE_15)) ||
+            mCurrMagnitude == 0) {
+            _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
+            return Void();
+    }
 
     status = play(-1);
     if (status == Status::OK)
-        timeout = mPlayLengthMs;
+        _hidl_cb(Status::OK, mPlayLengthMs);
+    else
+        _hidl_cb(Status::UNSUPPORTED_OPERATION, 0);
 
-    _hidl_cb(status, timeout);
     return Void();
 }
 
