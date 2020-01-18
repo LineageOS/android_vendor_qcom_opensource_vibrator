@@ -2,11 +2,23 @@ cc_binary {
     name: "vendor.qti.hardware.vibrator@1.2-service",
     relative_install_path: "hw",
     init_rc: ["vendor.qti.hardware.vibrator@1.2-service.rc"],
-    srcs: ["service.cpp", "Vibrator.cpp"],
     cflags: [
         "-Wall",
         "-Werror",
     ],
+    product_variables: {
+        qmaa_hal: {
+            srcs: ["service_qmaa.cpp"],
+        },
+
+        real_hal: {
+            srcs: [
+                "service.cpp",
+                "Vibrator.cpp",
+            ],
+        },
+
+    },
     shared_libs: [
         "libhidlbase",
         "libcutils",
