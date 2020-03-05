@@ -16,4 +16,7 @@ else
 PRODUCT_PACKAGES += \
       vendor.qti.hardware.vibrator.qmaa@1.2-service
 endif
+
+PRODUCT_COPY_FILES += \
+      vendor/qcom/opensource/vibrator/excluded-input-devices.xml:vendor/etc/excluded-input-devices.xml
 endif
