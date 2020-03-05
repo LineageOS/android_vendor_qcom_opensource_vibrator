@@ -1,23 +1,35 @@
+Common_CFlags = ["-Wall"]
+Common_CFlags += ["-Werror"]
+
+Common_SharedLibs = ["libhidlbase"]
+Common_SharedLibs += ["libcutils"]
+Common_SharedLibs += ["liblog"]
+Common_SharedLibs += ["libutils"]
+Common_SharedLibs += ["libhardware"]
+Common_SharedLibs += ["android.hardware.vibrator@1.0"]
+Common_SharedLibs += ["android.hardware.vibrator@1.1"]
+Common_SharedLibs += ["android.hardware.vibrator@1.2"]
+
 cc_binary {
     name: "vendor.qti.hardware.vibrator@1.2-service",
     relative_install_path: "hw",
     init_rc: ["vendor.qti.hardware.vibrator@1.2-service.rc"],
-    srcs: ["service.cpp", "Vibrator.cpp"],
-    cflags: [
-        "-Wall",
-        "-Werror",
+    cflags: Common_CFlags,
+    srcs: [
+            "service.cpp",
+            "Vibrator.cpp",
     ],
-    shared_libs: [
-        "libhidlbase",
-        "libcutils",
-        "libhidltransport",
-        "liblog",
-        "libhwbinder",
-        "libutils",
-        "libhardware",
-        "android.hardware.vibrator@1.0",
-        "android.hardware.vibrator@1.1",
-        "android.hardware.vibrator@1.2",
-    ],
+    shared_libs: Common_SharedLibs,
     vendor: true,
+}
+
+cc_binary {
+    name: "vendor.qti.hardware.vibrator.qmaa@1.2-service",
+    relative_install_path: "hw",
+    init_rc: ["vendor.qti.hardware.vibrator@1.2-service.rc"],
+    cflags: Common_CFlags,
+    srcs: ["service_qmaa.cpp"],
+    shared_libs: Common_SharedLibs,
+    vendor: true,
+    stem : "vendor.qti.hardware.vibrator@1.2-service",
 }
