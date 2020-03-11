@@ -31,4 +31,5 @@ cc_binary {
     srcs: ["service_qmaa.cpp"],
     shared_libs: Common_SharedLibs,
     vendor: true,
+    stem : "vendor.qti.hardware.vibrator@1.2-service",
 }
