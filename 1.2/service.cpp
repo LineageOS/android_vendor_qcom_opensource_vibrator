@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018,2020, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,14 +34,7 @@
 #include <hidl/HidlSupport.h>
 #include <hidl/HidlTransportSupport.h>
 
-#include <dirent.h>
-#include <string.h>
-
-#include <log/log.h>
-#include <linux/input.h>
-#include <sys/ioctl.h>
-
-#include "Vibrator.h"
+#include "Vibrator_1_2.h"
 
 using android::hardware::configureRpcThreadpool;
 using android::hardware::joinRpcThreadpool;
@@ -49,66 +42,13 @@ using android::hardware::vibrator::V1_2::IVibrator;
 using android::hardware::vibrator::V1_2::implementation::Vibrator;
 using namespace android;
 
-#define test_bit(bit, array)    ((array)[(bit)/8] & (1<<((bit)%8)))
 int main() {
-    DIR *dp;
-    struct dirent *dir;
-    uint8_t ffBitmask[FF_CNT / 8];
-    char devicename[PATH_MAX];
-    const char *INPUT_DIR = "/dev/input/";
-    bool supportGain = false, supportEffects = false;
-    bool found = false;
-    int fd, ret, vibraFd = -1;
+    int ret;
 
     configureRpcThreadpool(1, true);
 
-    dp = opendir(INPUT_DIR);
-    if (!dp) {
-        ALOGE("open %s failed, errno = %d", INPUT_DIR, errno);
-        return UNKNOWN_ERROR;
-    }
-    memset(ffBitmask, 0, sizeof(ffBitmask));
-    while ((dir = readdir(dp)) != NULL){
-        if (dir->d_name[0] == '.' &&
-            (dir->d_name[1] == '\0' ||
-             (dir->d_name[1] == '.' && dir->d_name[2] == '\0')))
-            continue;
-
-        snprintf(devicename, PATH_MAX, "%s%s", INPUT_DIR, dir->d_name);
-        fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
-        if (fd < 0) {
-            ALOGE("open %s failed, errno = %d", devicename, errno);
-            continue;
-        }
-
-        ret = TEMP_FAILURE_RETRY(ioctl(fd, EVIOCGBIT(EV_FF, sizeof(ffBitmask)), ffBitmask));
-        if (ret == -1) {
-            ALOGE("ioctl failed, errno = %d", errno);
-            close(fd);
-            continue;
-        }
-
-        if (test_bit(FF_CONSTANT, ffBitmask) ||
-                test_bit(FF_PERIODIC, ffBitmask)) {
-            found = true;
-            vibraFd = fd;
-            if (test_bit(FF_CUSTOM, ffBitmask))
-                supportEffects = true;
-            if (test_bit(FF_GAIN, ffBitmask))
-                supportGain = true;
-            break;
-        }
-        close(fd);
-    }
-    closedir(dp);
-
-    if (found) {
-        sp<IVibrator> vibrator = new Vibrator(vibraFd, supportGain, supportEffects);
-        ret =  vibrator->registerAsService();
-    } else {
-        ALOGE("Can't find vibrator device");
-        ret = UNKNOWN_ERROR;
-    }
+    sp<IVibrator> vibrator = new Vibrator();
+    ret = vibrator->registerAsService();
 
     joinRpcThreadpool();
     return ret;
