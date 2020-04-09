@@ -39,6 +39,9 @@
 #include <sys/ioctl.h>
 
 #include "Vibrator_1_2.h"
+#ifdef USE_EFFECT_STREAM
+#include "effect.h"
+#endif
 
 namespace android {
 namespace hardware {
@@ -138,6 +141,9 @@ Return<Status> InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playL
     #define CUSTOM_DATA_LEN    3
     int16_t data[CUSTOM_DATA_LEN] = {0, 0, 0};
     int ret;
+#ifdef USE_EFFECT_STREAM
+    const struct effect_stream *stream;
+#endif
 
     /* For QMAA compliance, return OK even if vibrator device doesn't exist */
     if (mVibraFd == INVALID_VALUE) {
@@ -164,6 +170,13 @@ Return<Status> InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playL
             effect.u.periodic.magnitude = mCurrMagnitude;
             effect.u.periodic.custom_data = data;
             effect.u.periodic.custom_len = sizeof(int16_t) * CUSTOM_DATA_LEN;
+#ifdef USE_EFFECT_STREAM
+            stream = get_effect_stream(effectId);
+            if (stream != NULL) {
+                effect.u.periodic.custom_data = (int16_t *)stream;
+                effect.u.periodic.custom_len = sizeof(*stream);
+            }
+#endif
         } else {
             effect.type = FF_CONSTANT;
             effect.u.constant.level = mCurrMagnitude;
@@ -180,8 +193,13 @@ Return<Status> InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playL
         }
 
         mCurrAppId = effect.id;
-        if (effectId != INVALID_VALUE && playLengthMs != NULL)
+        if (effectId != INVALID_VALUE && playLengthMs != NULL) {
             *playLengthMs = data[1] * 1000 + data[2];
+#ifdef USE_EFFECT_STREAM
+            if (stream != NULL && stream->play_rate_hz != 0)
+                *playLengthMs = ((stream->length * 1000) / stream->play_rate_hz) + 1;
+#endif
+        }
 
         play.value = 1;
         play.type = EV_FF;

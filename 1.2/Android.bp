@@ -2,6 +2,18 @@ Common_CFlags = ["-Wall"]
 Common_CFlags += ["-Werror"]
 
 cc_library_shared {
+    name: "libqtivibratoreffect",
+    vendor: true,
+    cflags: Common_CFlags,
+    srcs: ["effect.cpp"],
+    shared_libs: [
+        "libcutils",
+        "libutils",
+    ],
+    export_include_dirs: ["."]
+}
+
+cc_library_shared {
     name: "vendor.qti.hardware.vibrator@1.2-impl",
     vendor: true,
     cflags: Common_CFlags,
@@ -14,6 +26,7 @@ cc_library_shared {
         "libutils",
         "libhardware",
         "libhidlbase",
+        "libqtivibratoreffect",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
