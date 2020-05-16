@@ -27,12 +27,12 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define LOG_TAG "android.hardware.vibrator@1.2-service.qti"
+#define LOG_TAG "android.hardware.vibrator@1.2-service.qmaa"
 
 #include <hidl/HidlSupport.h>
 #include <hidl/HidlTransportSupport.h>
 
-#include "Vibrator.h"
+#include "Vibrator_qmaa.h"
 
 using android::hardware::configureRpcThreadpool;
 using android::hardware::joinRpcThreadpool;
