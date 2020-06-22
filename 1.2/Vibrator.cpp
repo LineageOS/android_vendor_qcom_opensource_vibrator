@@ -286,7 +286,7 @@ Return<Status> InputFFDevice::playEffect(int effectId, EffectStrength es, long *
         mCurrMagnitude = STRONG_MAGNITUDE;
         break;
     default:
-        break;
+	return Status::UNSUPPORTED_OPERATION;
     }
 
     return play(effectId, INVALID_VALUE, playLengthMs);
