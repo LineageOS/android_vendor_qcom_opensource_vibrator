@@ -1,19 +1,7 @@
-ifeq ($(call is-board-platform-in-list, msmnile kona lahaina), true)
+ifeq ($(call is-board-platform-in-list, msmnile kona lahaina shima), true)
 
 QTI_VIBRATOR_HAL_SERVICE := \
-      vendor.qti.hardware.vibrator@1.2-service
-
-ifeq ($(call is-board-platform-in-list, lahaina), true)
-QTI_VIBRATOR_HAL_SERVICE := \
-      vendor.qti.hardware.vibrator@1.3-service
-endif
-
-ifeq ($(TARGET_USES_QMAA),true)
-ifeq ($(TARGET_USES_QMAA_OVERRIDE_VIBRATOR),true)
-QTI_VIBRATOR_HAL_SERVICE := \
-      vendor.qti.hardware.vibrator.qmaa@1.2-service
-endif
-endif
+      vendor.qti.hardware.vibrator.service
 
 PRODUCT_PACKAGES += $(QTI_VIBRATOR_HAL_SERVICE)
 
