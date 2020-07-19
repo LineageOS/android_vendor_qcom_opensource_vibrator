@@ -1,4 +1,4 @@
-ifeq ($(call is-board-platform-in-list, msmnile kona lahaina shima), true)
+ifeq ($(call is-board-platform-in-list, msmnile kona lahaina shima lito), true)
 
 QTI_VIBRATOR_HAL_SERVICE := \
       vendor.qti.hardware.vibrator.service
