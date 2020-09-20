@@ -47,7 +47,6 @@ cc_library_shared {
         "liblog",
         "libqtivibratoreffect",
         "libqtivibratoreffectoffload",
-        "libsoc_helper",
         "libbinder_ndk",
     ],
     export_include_dirs: ["include"]
