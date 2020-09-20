@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c9e9a1f_6a54fdfb",
+        "filename": "aidl/Vibrator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2020-09-20T17:51:33Z",
+      "side": 1,
+      "message": "Can\u0027t this whole switch be replaced with simple soc id 400 || 415 check?",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 5
+      },
+      "revId": "dd5e631768dea0f99e0e71f73267f1c8cdb8311b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
