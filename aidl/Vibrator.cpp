@@ -27,8 +27,11 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* clang-format off */
 #define LOG_TAG "vendor.qti.vibrator"
 
+#include <cstdio>
+#include <cstdlib>
 #include <dirent.h>
 #include <inttypes.h>
 #include <linux/input.h>
@@ -42,9 +45,6 @@
 #include "effect.h"
 #endif
 
-extern "C" {
-#include "libsoc_helper.h"
-}
 namespace aidl {
 namespace android {
 namespace hardware {
@@ -56,9 +56,77 @@ namespace vibrator {
 #define INVALID_VALUE           -1
 #define CUSTOM_DATA_LEN    3
 
+#define MSM_CPU_UNKNOWN 0
+#define MSM_CPU_LAHAINA 400
+#define MSM_CPU_SHIMA   415
+
 #define test_bit(bit, array)    ((array)[(bit)/8] & (1<<((bit)%8)))
 
 static const char LED_DEVICE[] = "/sys/class/leds/vibrator";
+
+/* clang-format on */
+typedef struct {
+    uint32_t msm_cpu;
+} soc_info_v0_1_t;
+
+int get_soc_info(soc_info_v0_1_t* soc) {
+    FILE* fp;
+    uint32_t soc_id = 0;
+    fp = fopen("/sys/devices/soc0/soc_id", "r");
+
+    if (fp != NULL) fscanf(fp, "%u", &soc->msm_cpu);
+
+    switch (soc->msm_cpu) {
+        case 321:
+        case 336:
+        case 339:
+        case 356:
+        case 360:
+        case 322:
+        case 323:
+        case 324:
+        case 325:
+        case 326:
+        case 327:
+        case 328:
+        case 329:
+        case 330:
+        case 331:
+        case 332:
+        case 333:
+        case 334:
+        case 335:
+        case 337:
+        case 338:
+        case 340:
+        case 341:
+        case 342:
+        case 343:
+        case 344:
+        case 345:
+        case 346:
+        case 347:
+        case 348:
+        case 349:
+        case 350:
+        case 351:
+        case 352:
+        case 353:
+        case 354:
+        case 355:
+        case 357:
+        case 358:
+        case 359:
+        default:
+            if (soc->msm_cpu == 400 || soc->msm_cpu == 415) return soc->msm_cpu;
+            soc_id = atoi((const char*)&soc->msm_cpu);
+            ALOGD("msm CPU SoC ID: %d\n", soc_id);
+            soc->msm_cpu = {MSM_CPU_UNKNOWN};
+            break;
+    }
+    return 0;
+}
+/* clang-format off */
 
 InputFFDevice::InputFFDevice()
 {
@@ -117,7 +185,6 @@ InputFFDevice::InputFFDevice()
             ALOGD("msm CPU SoC ID: %d\n", soc.msm_cpu);
             switch (soc.msm_cpu) {
             case MSM_CPU_LAHAINA:
-            case APQ_CPU_LAHAINA:
             case MSM_CPU_SHIMA:
                 mSupportExternalControl = true;
                 break;
