@@ -29,6 +29,7 @@
 
 #define LOG_TAG "vendor.qti.vibrator"
 
+#include <cutils/properties.h>
 #include <dirent.h>
 #include <inttypes.h>
 #include <linux/input.h>
@@ -42,9 +43,6 @@
 #include "effect.h"
 #endif
 
-extern "C" {
-#include "libsoc_helper.h"
-}
 namespace aidl {
 namespace android {
 namespace hardware {
@@ -63,12 +61,13 @@ static const char LED_DEVICE[] = "/sys/class/leds/vibrator";
 InputFFDevice::InputFFDevice()
 {
     DIR *dp;
+    FILE *fp = NULL;
     struct dirent *dir;
     uint8_t ffBitmask[FF_CNT / 8];
     char devicename[PATH_MAX];
     const char *INPUT_DIR = "/dev/input/";
     int fd, ret;
-    soc_info_v0_1_t soc = {MSM_CPU_UNKNOWN};
+    int soc = property_get_int32("ro.vendor.qti.soc_id", -1);
 
     mVibraFd = INVALID_VALUE;
     mSupportGain = false;
@@ -113,17 +112,14 @@ InputFFDevice::InputFFDevice()
             if (test_bit(FF_GAIN, ffBitmask))
                 mSupportGain = true;
 
-            get_soc_info(&soc);
-            ALOGD("msm CPU SoC ID: %d\n", soc.msm_cpu);
-            switch (soc.msm_cpu) {
-            case MSM_CPU_LAHAINA:
-            case APQ_CPU_LAHAINA:
-            case MSM_CPU_SHIMA:
+            if (soc <= 0 && (fp = fopen("/sys/devices/soc0/soc_id", "r")) != NULL) {
+                fscanf(fp, "%u", &soc);
+                fclose(fp);
+            }
+            if (soc == 400 || soc == 415) {
                 mSupportExternalControl = true;
-                break;
-            default:
+            } else {
                 mSupportExternalControl = false;
-                break;
             }
             break;
         }
