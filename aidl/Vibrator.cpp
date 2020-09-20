@@ -42,9 +42,9 @@
 #include "effect.h"
 #endif
 
-extern "C" {
-#include "libsoc_helper.h"
-}
+#include <android-base/properties.h>
+using android::base::GetProperty;
+
 namespace aidl {
 namespace android {
 namespace hardware {
@@ -68,7 +68,6 @@ InputFFDevice::InputFFDevice()
     char devicename[PATH_MAX];
     const char *INPUT_DIR = "/dev/input/";
     int fd, ret;
-    soc_info_v0_1_t soc = {MSM_CPU_UNKNOWN};
 
     mVibraFd = INVALID_VALUE;
     mSupportGain = false;
@@ -113,17 +112,11 @@ InputFFDevice::InputFFDevice()
             if (test_bit(FF_GAIN, ffBitmask))
                 mSupportGain = true;
 
-            get_soc_info(&soc);
-            ALOGD("msm CPU SoC ID: %d\n", soc.msm_cpu);
-            switch (soc.msm_cpu) {
-            case MSM_CPU_LAHAINA:
-            case APQ_CPU_LAHAINA:
-            case MSM_CPU_SHIMA:
+            auto target = GetProperty("ro.board.platform", "");
+            if (target == "lahaina" || target=="shima") {
                 mSupportExternalControl = true;
-                break;
-            default:
+            } else {
                 mSupportExternalControl = false;
-                break;
             }
             break;
         }
