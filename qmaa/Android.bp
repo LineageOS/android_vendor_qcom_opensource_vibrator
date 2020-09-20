@@ -1,3 +1,6 @@
+soong_namespace {
+}
+
 Common_CFlags = ["-Wall"]
 Common_CFlags += ["-Werror"]
 
