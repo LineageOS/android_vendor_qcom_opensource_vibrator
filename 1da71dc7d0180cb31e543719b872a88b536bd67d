@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c182eaf2_218aea9e",
+        "filename": "aidl/Vibrator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2020-11-17T07:24:10Z",
+      "side": 1,
+      "message": "Use 4 spaces for indentation to match the rest of the code",
+      "range": {
+        "startLine": 115,
+        "startChar": 19,
+        "endLine": 115,
+        "endChar": 24
+      },
+      "revId": "1da71dc7d0180cb31e543719b872a88b536bd67d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    }
+  ]
+}
