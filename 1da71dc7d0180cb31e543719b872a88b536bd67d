@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "35e0534d_6c2a0f18",
+        "filename": "aidl/Vibrator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2020-11-19T10:25:21Z",
+      "side": 1,
+      "message": "default it to property_get(\"ro.vendor.qti.soc_id\")\nThis is what the library does",
+      "range": {
+        "startLine": 69,
+        "startChar": 14,
+        "endLine": 69,
+        "endChar": 16
+      },
+      "revId": "1da71dc7d0180cb31e543719b872a88b536bd67d",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c182eaf2_218aea9e",
         "filename": "aidl/Vibrator.cpp",
         "patchSetId": 5
