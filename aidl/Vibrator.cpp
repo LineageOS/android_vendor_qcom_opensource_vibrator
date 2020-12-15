@@ -119,6 +119,8 @@ InputFFDevice::InputFFDevice()
             case MSM_CPU_LAHAINA:
             case APQ_CPU_LAHAINA:
             case MSM_CPU_SHIMA:
+            case MSM_CPU_SM8325:
+            case APQ_CPU_SM8325P:
                 mSupportExternalControl = true;
                 break;
             default:
