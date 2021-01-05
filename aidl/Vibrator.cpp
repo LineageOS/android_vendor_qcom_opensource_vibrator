@@ -122,6 +122,7 @@ InputFFDevice::InputFFDevice()
             case MSM_CPU_SM8325:
             case APQ_CPU_SM8325P:
             case MSM_CPU_TARO:
+            case MSM_CPU_YUPIK:
                 mSupportExternalControl = true;
                 break;
             default:
