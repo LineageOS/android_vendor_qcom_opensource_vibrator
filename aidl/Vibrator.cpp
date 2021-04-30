@@ -68,7 +68,7 @@ InputFFDevice::InputFFDevice()
     char devicename[PATH_MAX];
     const char *INPUT_DIR = "/dev/input/";
     int fd, ret;
-    soc_info_v0_1_t soc = {MSM_CPU_UNKNOWN};
+    soc_info_v0_1_t soc;
 
     mVibraFd = INVALID_VALUE;
     mSupportGain = false;
