@@ -186,7 +186,7 @@ int PatternOffload::initChannel()
     rc = GlinkCh.GlinkOpen(chname);
     if (rc < 0)
     {
-        ALOGE("Failed to open Glink channel name %s\n", chname);
+        ALOGE("Failed to open Glink channel name %s\n", chname.c_str());
         return rc;
     }
 
