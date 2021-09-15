@@ -447,7 +447,7 @@ const static struct effect config_data[] = {
        .effect_type = EFFECT_TYPE_FIFO_ENVELOPE,
        .effect_len = ARRAY_SIZE(effect_6),
        .offset = OFFSET_EFFECT_6,
-       .play_rate = S_PERIOD_T_LRA,
+       .play_rate = S_PERIOD_T_LRA_X_8,
     },
 
     {
