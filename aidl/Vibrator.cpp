@@ -471,8 +471,11 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
 
     ALOGD("Vibrator perform effect %d", effect);
 
-    if (effect < Effect::CLICK ||
-            effect > Effect::HEAVY_CLICK)
+#ifdef TARGET_SUPPORTS_OFFLOAD
+    if (effect < Effect::CLICK ||  effect > Effect::RINGTONE_15)
+#else
+    if (effect < Effect::CLICK ||  effect > Effect::HEAVY_CLICK)
+#endif
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
     if (es != EffectStrength::LIGHT && es != EffectStrength::MEDIUM && es != EffectStrength::STRONG)
