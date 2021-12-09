@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9e0e1ee2_8a624fcf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2021-12-09T23:02:48Z",
+      "side": 1,
+      "message": "So, we can do this, or we can add something to the build/soong change to automatically swap this out like we do device_kernel_headers?",
+      "revId": "82ddd18b66411f44fce62c4a142bc88360cbea56",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
