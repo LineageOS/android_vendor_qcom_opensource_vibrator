@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f5633530_41795b61",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2021-12-09T23:40:15Z",
+      "side": 1,
+      "message": "Verified on TP1803 build target",
+      "revId": "d654b366b377451cb976496b720b21ea247c9761",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6dff9b00_d3c96b0e",
+        "filename": "aidl/Vibrator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2021-12-09T23:40:15Z",
+      "side": 1,
+      "message": "had to add due to the `property_get_int32` usage",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 30
+      },
+      "revId": "d654b366b377451cb976496b720b21ea247c9761",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
