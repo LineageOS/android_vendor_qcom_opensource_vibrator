@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ae7a73d_f7a88857",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2021-12-09T23:46:06Z",
+      "side": 1,
+      "message": "Mike asked me to adapt it to reflect 18.1 merges https://github.com/LineageOS/android_vendor_qcom_opensource_vibrator/commit/17efe0729cb2169c121c7abeb0bce592b4809d99",
+      "revId": "3faa5465d7bbb92cee8606c858c8e479683c3cfa",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
