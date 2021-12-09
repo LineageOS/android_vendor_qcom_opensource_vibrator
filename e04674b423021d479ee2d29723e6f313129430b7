@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c91f9717_adc9d6ef",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2021-12-09T23:40:52Z",
+      "side": 1,
+      "message": "Per Luk\u0027s idea - these aren\u0027t even needed - Verified on TP1803 build target\n\n`[100% 1328/1328] Copy: /mnt/Data/out/lineage-19/target/product/TP1803/obj_arm/SHARED_LIBRARIES/vendor.qti.hardware.vibrator.offload.impl_intermediates/vendor.qti.hardware.vibrator.offload.impl.so.toc`",
+      "revId": "e04674b423021d479ee2d29723e6f313129430b7",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
