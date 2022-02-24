@@ -1,5 +1,6 @@
 cc_library_shared {
     name: "vendor.qti.hardware.vibratorOL.impl",
+    defaults: ["qti_vibrator_hal_defaults"],
     vendor: true,
     cflags: Common_CFlags,
     srcs: [
@@ -10,7 +11,6 @@ cc_library_shared {
         "libcutils",
         "libutils",
         "liblog",
-        "libqtivibratoreffect",
         "libqtivibratoreffectoffload",
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
