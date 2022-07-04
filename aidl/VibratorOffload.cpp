@@ -139,17 +139,17 @@ void PatternOffload::SendPatterns()
         return;
 
     rc = get_pattern_data(&data, &len);
-    if (rc < 0 || !data)
+    if (rc < 0)
         return;
 
     /* Send pattern data */
     rc = sendData(data, len);
     if (rc < 0)
-        return;
+        ALOGE("pattern offloaded failed\n");
+    else
+        ALOGI("Patterns offloaded successfully\n");
 
     free_pattern_mem(data);
-
-    ALOGI("Patterns offloaded successfully\n");
 }
 
 int PatternOffload::sendData(uint8_t *data, int len)
