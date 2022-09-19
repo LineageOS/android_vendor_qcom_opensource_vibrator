@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "711281a7_2b1bc2a5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2022-09-19T23:44:50Z",
+      "side": 1,
+      "message": "This is a duplicate of https://review.lineageos.org/c/LineageOS/android_vendor_qcom_opensource_vibrator/+/322927, btw.",
+      "revId": "8e39025f95c85beabd26f02ad6bf7114ef0a76d5",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
