@@ -809,6 +809,9 @@ void Vibrator::composePlayThread(Vibrator *vibrator,
 
 ndk::ScopedAStatus Vibrator::compose(const std::vector<CompositeEffect>& composite,
                                      const std::shared_ptr<IVibratorCallback>& callback) {
+    int status, nfd = 0, durationMs = 0, timeoutMs = 0;
+    struct epoll_event events;
+
     if (composite.size() > ComposeSizeMax) {
         return ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
     }
@@ -826,17 +829,42 @@ ndk::ScopedAStatus Vibrator::compose(const std::vector<CompositeEffect>& composi
         if (std::find(supported.begin(), supported.end(), e.primitive) == supported.end()) {
             return ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
         }
+
+        getPrimitiveDuration(e.primitive, &durationMs);
+        timeoutMs += durationMs + e.delayMs;
     }
 
+    /*
+     * wait for 2 times of the play length timeout to make sure last play has been
+     * terminated successfully.
+     */
+    timeoutMs = (timeoutMs + 10) * 2;
     /* Stop previous composition if it has not yet been completed */
-    if (inComposition)
+    if (inComposition) {
+        ALOGD("Last composePlayThread has not done yet, stop it manually");
         off();
 
-    while (inComposition);
+        while (inComposition && timeoutMs--)
+            usleep(1000);
 
+        if (timeoutMs == 0) {
+            ALOGE("wait for last composePlayThread done timeout");
+            return ndk::ScopedAStatus::fromExceptionCode(EX_SERVICE_SPECIFIC);
+        }
+
+        /* Read the pipe again to remove any stale data before triggering a new play */
+        nfd = epoll_wait(epollfd, &events, 1, 0);
+        if (nfd == -1 && (errno != EINTR)) {
+            ALOGE("Failed to wait sleep playLengthMs, error=%d", errno);
+            return ndk::ScopedAStatus::fromExceptionCode(EX_SERVICE_SPECIFIC);
+        }
+        if (nfd > 0)
+            read(pipefd[0], &status, sizeof(int));
+    }
+
+    inComposition = true;
     composeThread = std::thread(composePlayThread, this, composite, callback);
     composeThread.detach();
-    inComposition = true;
 
     ALOGD("trigger composition successfully");
     return ndk::ScopedAStatus::ok();
