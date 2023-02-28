@@ -71,7 +71,6 @@ private:
     int write_value(const char *file, const char *value);
 };
 
-#ifdef TARGET_SUPPORTS_OFFLOAD
 class OffloadGlinkConnection {
 public:
     int GlinkOpen(std::string& dev);
@@ -89,12 +88,12 @@ public:
     PatternOffload();
     void SSREventListener(void);
     void SendPatterns();
+    int mEnabled;
 private:
     OffloadGlinkConnection GlinkCh;
     int initChannel();
     int sendData(uint8_t *data, int len);
 };
-#endif
 
 class Vibrator : public BnVibrator {
 public:
@@ -102,10 +101,8 @@ public:
     class LedVibratorDevice ledVib;
     Vibrator();
     ~Vibrator();
-
-#ifdef TARGET_SUPPORTS_OFFLOAD
     class PatternOffload Offload;
-#endif
+
     ndk::ScopedAStatus getCapabilities(int32_t* _aidl_return) override;
     ndk::ScopedAStatus off() override;
     ndk::ScopedAStatus on(int32_t timeoutMs,

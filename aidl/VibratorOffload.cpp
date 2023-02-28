@@ -25,6 +25,10 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 #define LOG_TAG "vendor.qti.vibrator.offload"
@@ -38,6 +42,7 @@
 #include <fcntl.h>
 #include <cutils/log.h>
 #include <cutils/uevent.h>
+#include <cutils/properties.h>
 #include <sys/poll.h>
 #include <sys/ioctl.h>
 
@@ -65,6 +70,15 @@ namespace vibrator {
 
 PatternOffload::PatternOffload()
 {
+    char prop_str[PROPERTY_VALUE_MAX];
+    mEnabled = 0;
+
+    if (property_get("ro.vendor.qc_aon_presence", prop_str, NULL))
+        mEnabled = atoi(prop_str);
+
+    if (mEnabled != 1)
+        return;
+
     std::thread t(&PatternOffload::SSREventListener, this);
     t.detach();
 }

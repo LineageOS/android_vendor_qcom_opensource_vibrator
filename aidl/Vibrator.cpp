@@ -575,15 +575,16 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
     ALOGD("Vibrator perform effect %d", effect);
-
-#ifdef TARGET_SUPPORTS_OFFLOAD
-    if ((effect < Effect::CLICK) ||
-        ((effect > Effect::HEAVY_CLICK) && (effect < Effect::RINGTONE_12)) ||
-        (effect > Effect::RINGTONE_15))
-#else
-    if (effect < Effect::CLICK ||  effect > Effect::HEAVY_CLICK)
-#endif
-        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+    if (Offload.mEnabled == 1) {
+        if ((effect < Effect::CLICK) ||
+            ((effect > Effect::HEAVY_CLICK) && (effect < Effect::RINGTONE_12)) ||
+            (effect > Effect::RINGTONE_15))
+            return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+    }
+    else {
+        if (effect < Effect::CLICK ||  effect > Effect::HEAVY_CLICK)
+            return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+    }
 
     if (es != EffectStrength::LIGHT && es != EffectStrength::MEDIUM && es != EffectStrength::STRONG)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
@@ -609,14 +610,14 @@ ndk::ScopedAStatus Vibrator::getSupportedEffects(std::vector<Effect>* _aidl_retu
     if (ledVib.mDetected)
         return ndk::ScopedAStatus::ok();
 
-#ifdef TARGET_SUPPORTS_OFFLOAD
-    *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
-                     Effect::POP, Effect::HEAVY_CLICK, Effect::RINGTONE_12,
-                     Effect::RINGTONE_13, Effect::RINGTONE_14, Effect::RINGTONE_15};
-#else
-    *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
-                     Effect::POP, Effect::HEAVY_CLICK};
-#endif
+    if (Offload.mEnabled == 1)
+        *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
+                         Effect::POP, Effect::HEAVY_CLICK, Effect::RINGTONE_12,
+                         Effect::RINGTONE_13, Effect::RINGTONE_14, Effect::RINGTONE_15};
+    else
+        *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
+                         Effect::POP, Effect::HEAVY_CLICK};
+
     return ndk::ScopedAStatus::ok();
 }
 
