@@ -71,12 +71,37 @@ private:
     int write_value(const char *file, const char *value);
 };
 
+class OffloadGlinkConnection {
+public:
+    int GlinkOpen(std::string& dev);
+    int GlinkClose();
+    int GlinkPoll();
+    int GlinkRead(uint8_t *data, size_t size);
+    int GlinkWrite(uint8_t *buf, size_t buflen);
+private:
+    std::string dev_name;
+    int fd;
+};
+
+class PatternOffload {
+public:
+    PatternOffload();
+    void SSREventListener(void);
+    void SendPatterns();
+    int mEnabled;
+private:
+    OffloadGlinkConnection GlinkCh;
+    int initChannel();
+    int sendData(uint8_t *data, int len);
+};
+
 class Vibrator : public BnVibrator {
 public:
     class InputFFDevice ff;
     class LedVibratorDevice ledVib;
     Vibrator();
     ~Vibrator();
+    class PatternOffload Offload;
 
     ndk::ScopedAStatus getCapabilities(int32_t* _aidl_return) override;
     ndk::ScopedAStatus off() override;
