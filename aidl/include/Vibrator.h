@@ -25,11 +25,16 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 #pragma once
 
 #include <aidl/android/hardware/vibrator/BnVibrator.h>
+#include <thread>
 
 namespace aidl {
 namespace android {
@@ -40,6 +45,7 @@ class InputFFDevice {
 public:
     InputFFDevice();
     int playEffect(int effectId, EffectStrength es, long *playLengthMs);
+    int playPrimitive(int primitiveId, float amplitude, long *playLengthMs);
     int on(int32_t timeoutMs);
     int off();
     int setAmplitude(uint8_t amplitude);
@@ -47,6 +53,7 @@ public:
     bool mSupportEffects;
     bool mSupportExternalControl;
     bool mInExternalControl;
+
 private:
     int play(int effectId, uint32_t timeoutMs, long *playLengthMs);
     int mVibraFd;
@@ -64,7 +71,6 @@ private:
     int write_value(const char *file, const char *value);
 };
 
-#ifdef TARGET_SUPPORTS_OFFLOAD
 class OffloadGlinkConnection {
 public:
     int GlinkOpen(std::string& dev);
@@ -82,20 +88,21 @@ public:
     PatternOffload();
     void SSREventListener(void);
     void SendPatterns();
+    int mEnabled;
 private:
     OffloadGlinkConnection GlinkCh;
     int initChannel();
     int sendData(uint8_t *data, int len);
 };
-#endif
 
 class Vibrator : public BnVibrator {
 public:
     class InputFFDevice ff;
     class LedVibratorDevice ledVib;
-#ifdef TARGET_SUPPORTS_OFFLOAD
+    Vibrator();
+    ~Vibrator();
     class PatternOffload Offload;
-#endif
+
     ndk::ScopedAStatus getCapabilities(int32_t* _aidl_return) override;
     ndk::ScopedAStatus off() override;
     ndk::ScopedAStatus on(int32_t timeoutMs,
@@ -126,6 +133,14 @@ public:
     ndk::ScopedAStatus getSupportedBraking(std::vector<Braking>* supported) override;
     ndk::ScopedAStatus composePwle(const std::vector<PrimitivePwle> &composite,
                                const std::shared_ptr<IVibratorCallback> &callback) override;
+private:
+    static void composePlayThread(Vibrator *vibrator,
+                        const std::vector<CompositeEffect>& composite,
+                        const std::shared_ptr<IVibratorCallback>& callback);
+    std::thread composeThread;
+    int epollfd;
+    int pipefd[2];
+    std::atomic<bool> inComposition;
 };
 
 }  // namespace vibrator
