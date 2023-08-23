@@ -78,8 +78,12 @@ namespace vibrator {
 
 #define test_bit(bit, array)    ((array)[(bit)/8] & (1<<((bit)%8)))
 
-static const char LED_DEVICE[] = "/sys/class/leds/vibrator";
+static const char LED_AWINIC_SYSFS[] = "/sys/class/leds/vibrator_1";
+static const char LED_DEVICE_SYSFS[] = "/sys/class/leds/vibrator";
 static const char HAPTICS_SYSFS[] = "/sys/class/qcom-haptics";
+
+static const char* LED_DEVICE = LED_DEVICE_SYSFS;
+static bool sUseAwinicNodes = false;
 
 static constexpr int32_t ComposeDelayMaxMs = 1000;
 static constexpr int32_t ComposeSizeMax = 256;
@@ -402,6 +406,24 @@ LedVibratorDevice::LedVibratorDevice() {
     mDetected = false;
     mIsLdo = false;
 
+    snprintf(devicename, sizeof(devicename), "%s/%s", LED_AWINIC_SYSFS, "activate");
+    fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
+    if (fd >= 0) {
+        LED_DEVICE = LED_AWINIC_SYSFS;
+        sUseAwinicNodes = true;
+    } else {
+        snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE_SYSFS, "activate");
+        fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
+        if (fd < 0) {
+            ALOGE("open %s failed, errno = %d", devicename, errno);
+            return;
+        }
+        LED_DEVICE = LED_DEVICE_SYSFS;
+        sUseAwinicNodes = false;
+    }
+
+    ALOGI("Using LED vibrator device %s", LED_DEVICE);
+
     snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "activate");
     fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
     if (fd < 0) {
@@ -449,6 +471,59 @@ int LedVibratorDevice::on(int32_t timeoutMs) {
     char value[32];
     int ret;
 
+    if (sUseAwinicNodes) {
+        snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "activate_mode");
+        ret = write_value(file, "0");
+        if (ret < 0)
+           goto error;
+
+        if (timeoutMs <= 50) {
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "seq");
+            ret = write_value(file, "0x00 0x00");
+            if (ret < 0)
+                goto error;
+
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "seq");
+            ret = write_value(file, "0x00 0x01");
+            if (ret < 0)
+                goto error;
+
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "loop");
+            ret = write_value(file, "0x00 0x00");
+            if (ret < 0)
+                goto error;
+
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "duration");
+            snprintf(value, sizeof(value), "%u\n", timeoutMs);
+            ret = write_value(file, value);
+            if (ret < 0)
+                goto error;
+
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "brightness");
+            ret = write_value(file, "1");
+            if (ret < 0)
+                goto error;
+        } else {
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "index");
+            ret = write_value(file, "4");
+            if (ret < 0)
+                goto error;
+
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "duration");
+            snprintf(value, sizeof(value), "%u\n", timeoutMs);
+            ret = write_value(file, value);
+            if (ret < 0)
+                goto error;
+
+            snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "activate");
+            ret = write_value(file, "1");
+            if (ret < 0)
+                goto error;
+        }
+
+        return 0;
+    }
+
     snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "state");
     ret = write_value(file, "1");
     if (ret < 0)
@@ -479,6 +554,14 @@ int LedVibratorDevice::off()
 
     snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "activate");
     ret = write_value(file, "0");
+    if (sUseAwinicNodes && ret >= 0) {
+        snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "brightness");
+        ret = write_value(file, "0");
+        if (ret < 0)
+            return ret;
+        snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "index");
+        ret = write_value(file, "1");
+    }
     return ret;
 }
 
