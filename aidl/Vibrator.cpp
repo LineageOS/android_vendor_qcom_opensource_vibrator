@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -157,7 +158,10 @@ InputFFDevice::InputFFDevice()
             case MSM_CPU_SM8325:
             case APQ_CPU_SM8325P:
             case MSM_CPU_TARO:
+            case MSM_CPU_TARO_LTE:
             case MSM_CPU_YUPIK:
+            case MSM_CPU_CAPE:
+            case APQ_CPU_CAPE:
             case MSM_CPU_KALAMA:
                 mSupportExternalControl = true;
                 break;
@@ -499,7 +503,6 @@ ndk::ScopedAStatus Vibrator::getCapabilities(int32_t* _aidl_return) {
     *_aidl_return = IVibrator::CAP_ON_CALLBACK;
 
     if (ledVib.mDetected) {
-        *_aidl_return |= IVibrator::CAP_PERFORM_CALLBACK;
         ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
         return ndk::ScopedAStatus::ok();
     }
