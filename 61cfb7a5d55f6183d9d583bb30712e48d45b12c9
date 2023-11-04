@@ -51,6 +51,24 @@
       "parentUuid": "8d5e15b3_848cb46d",
       "revId": "61cfb7a5d55f6183d9d583bb30712e48d45b12c9",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "73a6816d_2d31cda0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 24438
+      },
+      "writtenOn": "2023-11-04T17:17:43Z",
+      "side": 1,
+      "message": "does ur chain for reading the data from vendor have any advantages over just dumping the fifo from kernel and using the oplus patch I linked? This feels like overcomplicating things...",
+      "parentUuid": "d6e567d2_e33197b3",
+      "revId": "61cfb7a5d55f6183d9d583bb30712e48d45b12c9",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
