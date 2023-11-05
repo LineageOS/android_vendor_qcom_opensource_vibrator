@@ -69,6 +69,24 @@
       "parentUuid": "d6e567d2_e33197b3",
       "revId": "61cfb7a5d55f6183d9d583bb30712e48d45b12c9",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7ebb3603_b6268fd0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 21290
+      },
+      "writtenOn": "2023-11-05T09:35:33Z",
+      "side": 1,
+      "message": "yes, it simplifies the device side implementation by just having to add the 5 files from stock to proprietary-files.txt.",
+      "parentUuid": "73a6816d_2d31cda0",
+      "revId": "61cfb7a5d55f6183d9d583bb30712e48d45b12c9",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
