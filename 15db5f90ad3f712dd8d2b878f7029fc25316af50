@@ -33,6 +33,24 @@
       "message": "Derp?",
       "revId": "15db5f90ad3f712dd8d2b878f7029fc25316af50",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fb16e8e8_8d0a3ab6",
+        "filename": "excluded-input-devices.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 19841
+      },
+      "writtenOn": "2023-11-25T22:18:15Z",
+      "side": 1,
+      "message": "fixed 😄",
+      "parentUuid": "c438ab96_81f283bf",
+      "revId": "15db5f90ad3f712dd8d2b878f7029fc25316af50",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
