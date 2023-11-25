@@ -140,7 +140,8 @@ InputFFDevice::InputFFDevice()
         if (strcmp(name, "qcom-hv-haptics") && strcmp(name, "qti-haptics")
                 && strcmp(name, "aw8624_haptic")
                 && strcmp(name, "aw8695_haptic")
-                && strcmp(name, "aw8697_haptic")) {
+                && strcmp(name, "aw8697_haptic")
+                && strcmp(name, "awinic_haptic")) {
             ALOGD("not a supported haptics device\n");
             close(fd);
             continue;
