@@ -18,6 +18,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c472b63_eccd6394",
+        "filename": "aidl/Vibrator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2023-11-25T23:00:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf710474_129e9321",
+      "revId": "15db5f90ad3f712dd8d2b878f7029fc25316af50",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c438ab96_81f283bf",
@@ -49,6 +67,24 @@
       "side": 1,
       "message": "fixed 😄",
       "parentUuid": "c438ab96_81f283bf",
+      "revId": "15db5f90ad3f712dd8d2b878f7029fc25316af50",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "06cdf538_ce509936",
+        "filename": "excluded-input-devices.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2023-11-25T23:00:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb16e8e8_8d0a3ab6",
       "revId": "15db5f90ad3f712dd8d2b878f7029fc25316af50",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
