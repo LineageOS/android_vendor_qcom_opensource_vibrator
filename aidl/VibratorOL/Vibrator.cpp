@@ -229,8 +229,8 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
     if (!isPresent()) {
         if (playLengthMs != NULL)
             *playLengthMs = 0;
-            mtx.unlock();
-            return 0;
+        mtx.unlock();
+        return 0;
     }
 
     if (timeoutMs != 0) {
