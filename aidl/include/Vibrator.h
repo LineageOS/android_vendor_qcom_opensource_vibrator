@@ -67,8 +67,22 @@ public:
     int on(int32_t timeoutMs);
     int off();
     bool mDetected;
+
+    ndk::ScopedAStatus getCapabilities(int32_t* _aidl_return);
+    ndk::ScopedAStatus perform(Effect effect, EffectStrength es,
+                               const std::shared_ptr<IVibratorCallback>& callback,
+                               int32_t* _aidl_return);
+    ndk::ScopedAStatus getSupportedEffects(std::vector<Effect>* _aidl_return);
+    ndk::ScopedAStatus setAmplitude(float amplitude);
 private:
+    bool mSupportAmplitude;
+    bool mSupportEffects;
+    int32_t mEffectMsMultiplier;
+    int32_t mMvMin;
+    int32_t mMvMax;
     int write_value(const char *file, const char *value);
+    int32_t effectToMs(Effect effect);
+    float strengthToAmplitude(EffectStrength strength);
 };
 
 class OffloadGlinkConnection {

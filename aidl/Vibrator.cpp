@@ -393,9 +393,56 @@ LedVibratorDevice::LedVibratorDevice() {
     if (fd < 0) {
         ALOGE("open %s failed, errno = %d", devicename, errno);
         return;
+    } else {
+        close(fd);
+        mDetected = true;
     }
 
-    mDetected = true;
+    snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "vmax_mv");
+    fd = open(devicename, O_RDWR);
+    if (fd < 0) {
+        ALOGE("open %s failed, errno = %d", devicename, errno);
+    } else {
+        close(fd);
+        /*
+         * The min/max settable mv is usually defined in the vibrator driver
+         * For example, `drivers/leds/leds-qpnp-vibrator-ldo.c` has these defined:
+         * `#define QPNP_VIB_LDO_VMIN_UV 1504000`
+         * `#define QPNP_VIB_LDO_VMAX_UV 3544000`
+         * Apparently, It's in UV unit. Convert it to MV by dividing by 1000.
+         *
+         * However, It's just the voltage limit of the vibrator driver chip,
+         * It neither reflect the allowed voltage range of the vibrator motor,
+         * nor whatever that should be passed to here.
+         * You'll have to figure it out by looking up and/or trying.
+         */
+        mMvMin = property_get_int32("vendor.qcom.vibrator.led.mv_min", 0);
+        if (mMvMin < 0) {
+            ALOGE("Failed to get min mv for LED vibrator device");
+            mMvMin = 0;
+        }
+        mMvMax = property_get_int32("vendor.qcom.vibrator.led.mv_max", 0);
+        if (mMvMax < 0) {
+            ALOGE("Failed to get max mv for LED vibrator device");
+            mMvMax = 0;
+        }
+        if (mMvMin && mMvMax && mMvMax > mMvMin) {
+            ALOGI("Enable amplitude control");
+            mSupportAmplitude = true;
+        }
+    }
+
+    mSupportEffects = !!property_get_bool("vendor.qcom.vibrator.led.enable_effects", 0);
+    if (mSupportEffects) {
+        ALOGI("Enable effects");
+
+        mEffectMsMultiplier = property_get_int32("vendor.qcom.vibrator.led.effect_ms_multiplier", 0);
+        if (mEffectMsMultiplier > 0) {
+            ALOGI("Effect ms multiplier is %d", mEffectMsMultiplier);
+        }
+    }
+
+    return;
 }
 
 int LedVibratorDevice::write_value(const char *file, const char *value) {
@@ -522,8 +569,7 @@ ndk::ScopedAStatus Vibrator::getCapabilities(int32_t* _aidl_return) {
     *_aidl_return = IVibrator::CAP_ON_CALLBACK;
 
     if (ledVib.mDetected) {
-        ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
-        return ndk::ScopedAStatus::ok();
+        return ledVib.getCapabilities(_aidl_return);
     }
 
     if (ff.mSupportGain)
@@ -598,7 +644,7 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
     int ret;
 
     if (ledVib.mDetected)
-        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+        return ledVib.perform(effect, es, callback, _aidl_return);
 
     ALOGD("Vibrator perform effect %d", effect);
     if (Offload.mEnabled == 1) {
@@ -634,7 +680,7 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
 
 ndk::ScopedAStatus Vibrator::getSupportedEffects(std::vector<Effect>* _aidl_return) {
     if (ledVib.mDetected)
-        return ndk::ScopedAStatus::ok();
+        return ledVib.getSupportedEffects(_aidl_return);
 
     if (Offload.mEnabled == 1)
         *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
@@ -652,7 +698,7 @@ ndk::ScopedAStatus Vibrator::setAmplitude(float amplitude) {
     int ret;
 
     if (ledVib.mDetected)
-        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+        return ledVib.setAmplitude(amplitude);
 
     if (!ff.mSupportGain)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
