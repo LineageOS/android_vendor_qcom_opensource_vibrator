@@ -43,6 +43,7 @@ cc_library_shared {
     srcs: [
         "Vibrator.cpp",
         "VibratorOffload.cpp",
+        "VibratorLedExtra.cpp",
     ],
     shared_libs: [
         "libcutils",
