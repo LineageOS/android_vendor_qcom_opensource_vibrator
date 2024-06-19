@@ -393,9 +393,34 @@ LedVibratorDevice::LedVibratorDevice() {
     if (fd < 0) {
         ALOGE("open %s failed, errno = %d", devicename, errno);
         return;
+    } else {
+        close(fd);
+        mDetected = true;
     }
 
-    mDetected = true;
+    snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "vmax_mv");
+    fd = open(devicename, O_RDWR);
+    if (fd < 0) {
+        ALOGE("open %s failed, errno = %d", devicename, errno);
+    } else {
+        close(fd);
+        mMvMin = property_get_int32("vendor.qcom.vibrator.led.mv_min", 0);
+        if (mMvMin < 0) {
+            ALOGE("Failed to get min mv for LED vibrator device");
+            mMvMin = 0;
+        }
+        mMvMax = property_get_int32("vendor.qcom.vibrator.led.mv_max", 0);
+        if (mMvMax < 0) {
+            ALOGE("Failed to get max mv for LED vibrator device");
+            mMvMax = 0;
+        }
+        if (mMvMin && mMvMax && mMvMax > mMvMin) {
+            ALOGI("Enable amplitude control");
+            mAmplitudeControlEnabled = true;
+        }
+    }
+
+    return;
 }
 
 int LedVibratorDevice::write_value(const char *file, const char *value) {
@@ -522,8 +547,7 @@ ndk::ScopedAStatus Vibrator::getCapabilities(int32_t* _aidl_return) {
     *_aidl_return = IVibrator::CAP_ON_CALLBACK;
 
     if (ledVib.mDetected) {
-        ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
-        return ndk::ScopedAStatus::ok();
+        return ledVib.getCapabilities(_aidl_return);
     }
 
     if (ff.mSupportGain)
@@ -598,7 +622,7 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
     int ret;
 
     if (ledVib.mDetected)
-        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+        return ledVib.perform(effect, es, callback, _aidl_return);
 
     ALOGD("Vibrator perform effect %d", effect);
     if (Offload.mEnabled == 1) {
@@ -634,7 +658,7 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
 
 ndk::ScopedAStatus Vibrator::getSupportedEffects(std::vector<Effect>* _aidl_return) {
     if (ledVib.mDetected)
-        return ndk::ScopedAStatus::ok();
+        return ledVib.getSupportedEffects(_aidl_return);
 
     if (Offload.mEnabled == 1)
         *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
@@ -652,7 +676,7 @@ ndk::ScopedAStatus Vibrator::setAmplitude(float amplitude) {
     int ret;
 
     if (ledVib.mDetected)
-        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+        return ledVib.setAmplitude(amplitude);
 
     if (!ff.mSupportGain)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
