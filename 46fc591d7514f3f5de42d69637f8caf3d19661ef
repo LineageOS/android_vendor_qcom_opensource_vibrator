@@ -33,6 +33,23 @@
       "message": "whoops wait, I\u0027ve forgot to test on devices that has simpler vibrator...",
       "revId": "46fc591d7514f3f5de42d69637f8caf3d19661ef",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "81978a80_c526b936",
+        "filename": "aidl/VibratorLedExtra.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2024-06-21T13:57:16Z",
+      "side": 1,
+      "message": "```cpp\nwrite_value(\"/sys/class/leds/vibrator/vmax_mv\", std::to_string(mv).c_str())\n```",
+      "revId": "46fc591d7514f3f5de42d69637f8caf3d19661ef",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
