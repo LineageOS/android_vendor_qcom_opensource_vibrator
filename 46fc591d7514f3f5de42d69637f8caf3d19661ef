@@ -16,6 +16,23 @@
       "message": "unlike my old custom vibrator hal, this code feels fine to me...",
       "revId": "46fc591d7514f3f5de42d69637f8caf3d19661ef",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "747f2d6a_4be74f3e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 32245
+      },
+      "writtenOn": "2024-06-21T12:49:04Z",
+      "side": 1,
+      "message": "whoops wait, I\u0027ve forgot to test on devices that has simpler vibrator...",
+      "revId": "46fc591d7514f3f5de42d69637f8caf3d19661ef",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
