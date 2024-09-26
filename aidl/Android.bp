@@ -28,6 +28,7 @@ cc_library_shared {
 cc_binary {
     name: "vendor.qti.hardware.vibrator.service",
     vendor: true,
+    cflags: Common_CFlags,
     relative_install_path: "hw",
     init_rc: ["vendor.qti.hardware.vibrator.service.rc"],
     vintf_fragments: [
