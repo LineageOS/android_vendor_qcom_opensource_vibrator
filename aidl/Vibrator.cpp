@@ -64,6 +64,9 @@ namespace vibrator {
 #define NAME_BUF_SIZE           32
 #define PRIMITIVE_ID_MASK       0x8000
 #define MAX_PATTERN_ID          32767
+#define VIB_LED  0x01
+#define VIB_AW   0x02
+#define VIB_ALL (VIB_LED|VIB_AW)
 
 #define MSM_CPU_LAHAINA         415
 #define APQ_CPU_LAHAINA         439
@@ -82,6 +85,7 @@ namespace vibrator {
 
 static const char LED_DEVICE[] = "/sys/class/leds/vibrator";
 static const char HAPTICS_SYSFS[] = "/sys/class/qcom-haptics";
+static const char AW_DEVICE[] = "/sys/class/leds/aw_vibrator";
 
 static constexpr int32_t ComposeDelayMaxMs = 1000;
 static constexpr int32_t ComposeSizeMax = 256;
@@ -322,7 +326,6 @@ int InputFFDevice::off() {
 int InputFFDevice::setAmplitude(uint8_t amplitude) {
     int tmp, ret;
     struct input_event ie;
-
     /* For QMAA compliance, return OK even if vibrator device doesn't exist */
     if (mVibraFd == INVALID_VALUE)
         return 0;
@@ -392,14 +395,26 @@ LedVibratorDevice::LedVibratorDevice() {
     int fd;
 
     mDetected = false;
+    vibrator_dev = VIB_ALL;
 
     snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "activate");
     fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
     if (fd < 0) {
-        ALOGE("open %s failed, errno = %d", devicename, errno);
-        return;
+        ALOGE("vibrator open %s failed, errno = %d", devicename, errno);
+        vibrator_dev &= ~ VIB_LED;
+ //       return;
     }
 
+   snprintf(devicename, sizeof(devicename), "%s/%s", AW_DEVICE, "activate");
+    fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
+    if (fd < 0) {
+        ALOGE("vibrator open %s failed, errno = %d", devicename, errno);
+        vibrator_dev &= ~ VIB_AW;
+    }
+    ALOGE("vibrator device = %d", vibrator_dev);
+    if(!vibrator_dev)
+        return;
+    ALOGE("vibrator true");
     mDetected = true;
 }
 
@@ -432,10 +447,101 @@ int LedVibratorDevice::write_value(const char *file, const char *value) {
     return ret;
 }
 
+static int write_aw_value(const char *file, const char *value) {
+    int fd;
+    int ret;
+
+    fd = TEMP_FAILURE_RETRY(open(file, O_WRONLY));
+    if (fd < 0) {
+        ALOGE("open %s failed, errno = %d", file, errno);
+        return -errno;
+    }
+
+    ret = TEMP_FAILURE_RETRY(write(fd, value, strlen(value) + 1));
+    if (ret == -1) {
+        ret = -errno;
+    } else if (ret != strlen(value) + 1) {
+        /* even though EAGAIN is an errno value that could be set
+           by write() in some cases, none of them apply here.  So, this return
+           value can be clearly identified when debugging and suggests the
+           caller that it may try to call vibrator_on() again */
+        ret = -EAGAIN;
+    } else {
+        ret = 0;
+    }
+
+    errno = 0;
+    close(fd);
+
+    return ret;
+}
+
+
+
+
 int LedVibratorDevice::on(int32_t timeoutMs) {
     char file[PATH_MAX];
     char value[32];
     int ret;
+    ALOGD("AwVibrator on time = %d ",timeoutMs);
+    if(vibrator_dev & VIB_AW)
+    {
+        ALOGD("AwVibrator time = %d ",timeoutMs);
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "activate_mode");
+        ret = write_value(file, "0");
+        if (ret < 0)
+            goto error;
+
+	if (timeoutMs <= 50) {
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "seq");
+        ret = write_value(file, "0x00 0x00");
+        if (ret < 0)
+            goto error;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "seq");
+        ret = write_value(file, "0x00 0x01");
+        if (ret < 0)
+            goto error;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "loop");
+        ret = write_value(file, "0x00 0x00");
+        if (ret < 0)
+            goto error;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "duration");
+        snprintf(value, sizeof(value), "%u\n", timeoutMs);
+        ret = write_value(file, value);
+        if (ret < 0)
+            goto error;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "brightness");
+        ret = write_value(file, "1");
+        if (ret < 0)
+            goto error;
+
+        return 0;
+
+	} else {
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "index");
+        ret = write_value(file, "4");
+        if (ret < 0)
+            goto error;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "duration");
+        snprintf(value, sizeof(value), "%u\n", timeoutMs);
+        ret = write_value(file, value);
+        if (ret < 0)
+            goto error;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "activate");
+        ret = write_value(file, "1");
+        if (ret < 0)
+            goto error;
+
+        return 0;
+	}
+    }
 
     snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "state");
     ret = write_value(file, "1");
@@ -464,6 +570,25 @@ int LedVibratorDevice::off()
 {
     char file[PATH_MAX];
     int ret;
+    ALOGD("LedVibrator device = %d ",vibrator_dev);
+    if(vibrator_dev & VIB_AW)
+    {
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "activate");
+        ret = write_value(file, "0");
+
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "brightness");
+        ret = write_value(file, "0");
+        if (ret < 0)
+            return ret;
+
+        snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "index");
+        ret = write_value(file, "1");
+        if (ret < 0)
+            return ret;
+
+        return ret;
+    }
 
     snprintf(file, sizeof(file), "%s/%s", LED_DEVICE, "activate");
     ret = write_value(file, "0");
@@ -601,9 +726,31 @@ ndk::ScopedAStatus Vibrator::on(int32_t timeoutMs,
 ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std::shared_ptr<IVibratorCallback>& callback, int32_t* _aidl_return) {
     long playLengthMs;
     int ret;
-
-    if (ledVib.mDetected)
+    
+    char file[PATH_MAX];
+    char value[32];
+    ALOGD("Vibrator perform EffectStrength %d", es);
+    if (ledVib.mDetected){
+        if(ledVib.vibrator_dev & VIB_AW) {
+            ALOGD(" Vibrator::perform");
+            snprintf(file, sizeof(file), "%s/%s", AW_DEVICE, "gain");
+            switch (es) {
+                case EffectStrength::LIGHT:
+                     write_aw_value(file, "0x10");
+                     break;
+                case EffectStrength::MEDIUM:
+                     write_aw_value(file, "0x45");
+                     break;   
+                case EffectStrength::STRONG:
+                     write_aw_value(file, "0x80");
+                     break;
+                default:
+                     write_aw_value(file, "0x80");
+                     break;
+                }
+        }
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+    }
 
     ALOGD("Vibrator perform effect %d", effect);
     if (Offload.mEnabled == 1) {
