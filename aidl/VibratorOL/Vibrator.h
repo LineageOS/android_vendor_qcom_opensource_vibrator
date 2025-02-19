@@ -94,6 +94,7 @@ public:
     int on(int32_t timeoutMs);
     int off();
     bool mDetected;
+    uint8_t vibrator_dev;
 private:
     int write_value(const char *file, const char *value);
 };
