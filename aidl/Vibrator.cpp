@@ -108,6 +108,7 @@ InputFFDevice::InputFFDevice()
     mSupportExternalControl = false;
     mCurrAppId = INVALID_VALUE;
     mCurrMagnitude = 0x7fff;
+    mCurrStrength = INVALID_VALUE;
     mInExternalControl = false;
 
     dp = opendir(INPUT_DIR);
@@ -362,6 +363,8 @@ int InputFFDevice::playEffect(int effectId, EffectStrength es, long *playLengthM
     default:
         return -1;
     }
+
+    mCurrStrength = static_cast<int8_t>(es);
 
     return play(effectId, INVALID_VALUE, playLengthMs);
 }
