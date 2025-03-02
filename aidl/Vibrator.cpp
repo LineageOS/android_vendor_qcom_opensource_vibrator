@@ -655,13 +655,25 @@ ndk::ScopedAStatus Vibrator::getSupportedEffects(std::vector<Effect>* _aidl_retu
     if (ledVib.mDetected)
         return ndk::ScopedAStatus::ok();
 
-    if (Offload.mEnabled == 1)
+    if (Offload.mEnabled == 1) {
         *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
                          Effect::POP, Effect::HEAVY_CLICK, Effect::RINGTONE_12,
                          Effect::RINGTONE_13, Effect::RINGTONE_14, Effect::RINGTONE_15};
-    else
-        *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
-                         Effect::POP, Effect::HEAVY_CLICK};
+        return ndk::ScopedAStatus::ok();
+    }
+
+#ifndef USE_EFFECT_STREAM
+    *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
+                     Effect::POP, Effect::HEAVY_CLICK};
+#else
+    const struct effect_stream *stream;
+
+    for (Effect effect = Effect::CLICK; effect <= Effect::TEXTURE_TICK; effect++) {
+        stream = get_effect_stream(effectId);
+        if (stream)
+            _aidl_return->push(effect);
+    }
+#endif
 
     return ndk::ScopedAStatus::ok();
 }
