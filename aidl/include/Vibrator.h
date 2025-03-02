@@ -60,6 +60,7 @@ private:
     int mVibraFd;
     int16_t mCurrAppId;
     int16_t mCurrMagnitude;
+    int8_t mCurrStrength;
     std::mutex mtx;
 };
 
