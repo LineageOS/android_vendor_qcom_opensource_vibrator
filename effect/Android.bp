@@ -1,6 +1,12 @@
 Common_CFlags = ["-Wall"]
 Common_CFlags += ["-Werror"]
 
+cc_library_headers {
+    name: "libqtivibratoreffect_headers",
+    vendor: true,
+    export_include_dirs: ["."],
+}
+
 cc_library_shared {
     name: "libqtivibratoreffect",
     vendor: true,
@@ -12,7 +18,6 @@ cc_library_shared {
         "libcutils",
         "libutils",
     ],
-    export_include_dirs: ["."]
 }
 
 cc_library_shared {
@@ -26,5 +31,4 @@ cc_library_shared {
         "libcutils",
         "libutils",
     ],
-    export_include_dirs: ["."]
 }
