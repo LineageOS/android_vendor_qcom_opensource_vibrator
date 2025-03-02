@@ -90,6 +90,11 @@ enum composeEvent {
     STOP_COMPOSE = 0,
 };
 
+const struct effect_stream * __attribute__((weak))
+get_effect_stream_strength(uint32_t effect_id, uint8_t strength) {
+    return NULL;
+}
+
 InputFFDevice::InputFFDevice()
 {
     DIR *dp;
@@ -252,7 +257,13 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
             effect.u.periodic.custom_data = data;
             effect.u.periodic.custom_len = sizeof(int16_t) * CUSTOM_DATA_LEN;
 #ifdef USE_EFFECT_STREAM
-            stream = get_effect_stream(effectId);
+            stream = get_effect_stream_strength(effectId, mCurrStrength);
+            if (stream) {
+                effect.u.periodic.magnitude = STRONG_MAGNITUDE;
+            } else {
+                stream = get_effect_stream(effectId);
+            }
+
             if (stream != NULL) {
                 effect.u.periodic.custom_data = (int16_t *)stream;
                 effect.u.periodic.custom_len = sizeof(*stream);
