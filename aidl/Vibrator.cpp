@@ -51,6 +51,13 @@
 #include "effect.h"
 #endif
 
+#ifndef USE_EFFECT_STREAM_STRENGTH
+const struct effect_stream *
+get_effect_stream_strength(uint32_t effect_id, uint8_t strength) {
+    return NULL;
+}
+#endif
+
 namespace aidl {
 namespace android {
 namespace hardware {
@@ -108,6 +115,7 @@ InputFFDevice::InputFFDevice()
     mSupportExternalControl = false;
     mCurrAppId = INVALID_VALUE;
     mCurrMagnitude = 0x7fff;
+    mCurrStrength = INVALID_VALUE;
     mInExternalControl = false;
 
     dp = opendir(INPUT_DIR);
@@ -251,7 +259,13 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
             effect.u.periodic.custom_data = data;
             effect.u.periodic.custom_len = sizeof(int16_t) * CUSTOM_DATA_LEN;
 #ifdef USE_EFFECT_STREAM
-            stream = get_effect_stream(effectId);
+            stream = get_effect_stream_strength(effectId, mCurrStrength);
+            if (stream) {
+                effect.u.periodic.magnitude = STRONG_MAGNITUDE;
+            } else {
+                stream = get_effect_stream(effectId);
+            }
+
             if (stream != NULL) {
                 effect.u.periodic.custom_data = (int16_t *)stream;
                 effect.u.periodic.custom_len = sizeof(*stream);
@@ -362,6 +376,8 @@ int InputFFDevice::playEffect(int effectId, EffectStrength es, long *playLengthM
     default:
         return -1;
     }
+
+    mCurrStrength = static_cast<int8_t>(es);
 
     return play(effectId, INVALID_VALUE, playLengthMs);
 }
