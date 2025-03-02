@@ -3,7 +3,6 @@ Common_CFlags += ["-Werror"]
 
 cc_library_shared {
     name: "vendor.qti.hardware.vibrator.impl",
-    defaults: ["qti_vibrator_hal_defaults"],
     vendor: true,
     cflags: Common_CFlags,
     srcs: [
