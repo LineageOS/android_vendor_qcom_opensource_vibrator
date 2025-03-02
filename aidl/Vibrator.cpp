@@ -108,6 +108,7 @@ InputFFDevice::InputFFDevice()
     mSupportExternalControl = false;
     mCurrAppId = INVALID_VALUE;
     mCurrMagnitude = 0x7fff;
+    mCurrStrength = INVALID_VALUE;
     mInExternalControl = false;
 
     dp = opendir(INPUT_DIR);
@@ -220,7 +221,7 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
     int16_t data[CUSTOM_DATA_LEN] = {0, 0, 0};
     int ret;
 #ifdef USE_EFFECT_STREAM
-    const struct effect_stream *stream;
+    const struct effect_stream *stream = NULL;
 #endif
 
     mtx.lock();
@@ -251,7 +252,17 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
             effect.u.periodic.custom_data = data;
             effect.u.periodic.custom_len = sizeof(int16_t) * CUSTOM_DATA_LEN;
 #ifdef USE_EFFECT_STREAM
-            stream = get_effect_stream(effectId);
+#ifdef USE_EFFECT_STREAM_STRENGTH
+            if (mCurrStrength != INVALID_VALUE) {
+                stream = get_effect_stream_strength(effectId, mCurrStrength);
+                if (stream)
+                    effect.u.periodic.magnitude = STRONG_MAGNITUDE;
+            }
+#endif
+
+            if (!stream)
+                stream = get_effect_stream(effectId);
+
             if (stream != NULL) {
                 effect.u.periodic.custom_data = (int16_t *)stream;
                 effect.u.periodic.custom_len = sizeof(*stream);
@@ -363,6 +374,8 @@ int InputFFDevice::playEffect(int effectId, EffectStrength es, long *playLengthM
         return -1;
     }
 
+    mCurrStrength = static_cast<int8_t>(es);
+
     return play(effectId, INVALID_VALUE, playLengthMs);
 }
 
@@ -379,6 +392,7 @@ int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLen
     tmp = (uint8_t)(amplitude * 0xff);
     mCurrMagnitude = tmp * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE) / 255;
     mCurrMagnitude += LIGHT_MAGNITUDE;
+    mCurrStrength = INVALID_VALUE;
 
     ret = play(primitiveId, INVALID_VALUE, playLengthMs);
     if (ret != 0)
