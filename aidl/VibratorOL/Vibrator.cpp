@@ -138,7 +138,8 @@ InputFFDevice::InputFFDevice()
                 && strcmp(name, "aw8695_haptic")
                 && strcmp(name, "aw8697_haptic")
                 && strcmp(name, "awinic_haptic")
-                && strcmp(name, "drv2624:haptics")) {
+                && strcmp(name, "drv2624:haptics")
+                && strcmp(name, "haptic_rt")) {
             ALOGD("not a supported haptics device\n");
             close(fd);
             continue;
@@ -565,11 +566,15 @@ ndk::ScopedAStatus VibratorOL::getCapabilities(int32_t* _aidl_return) {
         *_aidl_return |= IVibrator::CAP_AMPLITUDE_CONTROL;
     if (ff.mSupportEffects) {
         *_aidl_return |= IVibrator::CAP_PERFORM_CALLBACK;
+#ifndef USE_EFFECT_STREAM
         int32_t primitiveDuration = 0;
         uint32_t primitiveId = static_cast<uint32_t>(CompositePrimitive::CLICK);
         getPrimitiveDurationFromSysfs(primitiveId, &primitiveDuration);
         if (primitiveDuration != 0)
             *_aidl_return |= IVibrator::CAP_COMPOSE_EFFECTS;
+#else
+        *_aidl_return |= IVibrator::CAP_COMPOSE_EFFECTS;
+#endif
     }
     if (ff.mSupportExternalControl)
         *_aidl_return |= IVibrator::CAP_EXTERNAL_CONTROL;
