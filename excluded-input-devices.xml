@@ -35,4 +35,5 @@
     <device name="awinic_haptic"/>
     <device name="drv2624:haptics"/>
     <device name="si_haptic"/>
+    <device name="haptic_rt"/>
 </devices>
