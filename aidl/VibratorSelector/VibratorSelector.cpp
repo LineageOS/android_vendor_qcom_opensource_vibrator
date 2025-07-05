@@ -217,23 +217,14 @@ void VibratorSelector::process_xml_info(haptics_policy_xml_data *data,
 
     if (data->hapticstag == TAG_HAPTICS_COMPOSE_API) {
         if (!strcmp(tag_name, "SupportCompose")) {
-		ALOGE("support value for Composition: %s", data->data_buf);
-            if (strstr(data->data_buf, "False")) {
-                vibForComposition = VIB_TYPE_CL;
-            } else {
-                vibForComposition = VIB_TYPE_OL;
-            }
+            vibForComposition = VIB_TYPE_OL;
             ALOGI("support value for Composition: %d", vibForComposition);
         }
     }
 
     if (data->hapticstag == TAG_HAPTICS_COMPOSE_PWLE_API) {
         if (!strcmp(tag_name, "SupportComposePWLE")) {
-            if (strstr(data->data_buf, "False")) {
-                vibForPwle = VIB_TYPE_CL;
-            } else {
-                vibForPwle = VIB_TYPE_OL;
-            }
+            vibForPwle = VIB_TYPE_OL;
             ALOGI("support value for Compose PWL: %d", vibForPwle);
         }
     }
@@ -243,19 +234,12 @@ vibrator_type VibratorSelector::getVibForOnApi(int32_t timeout)
 {
     vibrator_type vibType = VIB_TYPE_OL;
 
-    vibType = timeout <= maxTimeoutOnConfig ? VIB_TYPE_OL : VIB_TYPE_CL;
-
     return vibType;
 }
 
 vibrator_type VibratorSelector::getVibForPerformApi(int effect_id)
 {
     vibrator_type vibType = VIB_TYPE_OL;
-
-    if (std::find(effectIDPerformConfig.begin(), effectIDPerformConfig.end(),
-        effect_id) == effectIDPerformConfig.end()) {
-            vibType = VIB_TYPE_CL;
-    }
 
     return vibType;
 }

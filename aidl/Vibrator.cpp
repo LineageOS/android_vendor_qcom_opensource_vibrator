@@ -40,7 +40,6 @@
 
 #include "Vibrator.h"
 #include "VibratorOL/Vibrator.h"
-#include "VibratorCL/Vibrator.h"
 #include "VibratorSelector/VibratorSelector.h"
 
 namespace aidl {
@@ -51,7 +50,6 @@ namespace vibrator {
 class Vibrator::VibratorPrivate {
 private:
     VibratorOL mVibratorOL;
-    VibratorCL mVibratorCL;
     IVibrator* mSelectedVibrator;
     std::mutex VibratorSelectionLock;
     bool mSupportCL;
@@ -72,14 +70,7 @@ public:
     }
 
     ndk::ScopedAStatus getCapabilities(int32_t* _aidl_return) {
-        int32_t capabilities;
-
-        /* Merge the capabilities of both mVibratorOL and mVibratorCL */
         mVibratorOL.getCapabilities(_aidl_return);
-        if (mSupportCL) {
-            mVibratorCL.getCapabilities(&capabilities);
-            *_aidl_return |= capabilities;
-        }
 
         return ndk::ScopedAStatus::ok();
     }
@@ -90,8 +81,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForOnApi(timeoutMs) == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->on(timeoutMs, callback);
         VibratorSelectionLock.unlock();
@@ -118,8 +107,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForPerformApi(effect_id) == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->perform(effect, es, callback, _aidl_return);
         VibratorSelectionLock.unlock();
@@ -128,17 +115,7 @@ public:
     }
 
     ndk::ScopedAStatus getSupportedEffects(std::vector<Effect>* _aidl_return) {
-        std::vector<Effect> effectsCL;
-
-        /* Merge the effects being supported by both mVibratorOL and mVibratorCL */
         mVibratorOL.getSupportedEffects(_aidl_return);
-        if (mSupportCL) {
-            mVibratorCL.getSupportedEffects(&effectsCL);
-            for (uint32_t i = 0; i < effectsCL.size() ; i++) {
-                if (std::find(_aidl_return->begin(), _aidl_return->end(), effectsCL[i]) == _aidl_return->end())
-                    _aidl_return->insert(_aidl_return->end(), effectsCL[i]);
-            }
-        }
 
         return ndk::ScopedAStatus::ok();
     }
@@ -159,9 +136,6 @@ public:
 
         VibratorSelectionLock.lock();
 
-        if (mSupportCL)
-            mVibratorCL.setExternalControl(enabled);
-
         status = mVibratorOL.setExternalControl(enabled);
 
         VibratorSelectionLock.unlock();
@@ -175,8 +149,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForComposeApi() == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->getCompositionDelayMax(maxDelayMs);
         VibratorSelectionLock.unlock();
@@ -190,8 +162,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForComposeApi() == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->getCompositionSizeMax(maxSize);
         VibratorSelectionLock.unlock();
@@ -205,8 +175,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForComposeApi() == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->getSupportedPrimitives(supported);
         VibratorSelectionLock.unlock();
@@ -220,8 +188,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForComposeApi() == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->getPrimitiveDuration(primitive, durationMs);
         VibratorSelectionLock.unlock();
@@ -236,8 +202,6 @@ public:
         VibratorSelectionLock.lock();
 
         mSelectedVibrator = &mVibratorOL;
-        if (mVibSelector && mVibSelector->getVibForComposeApi() == VIB_TYPE_CL)
-            mSelectedVibrator = &mVibratorCL;
 
         status = mSelectedVibrator->compose(composite, callback);
         VibratorSelectionLock.unlock();

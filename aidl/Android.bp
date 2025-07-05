@@ -15,7 +15,6 @@ cc_library_shared {
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
         "vendor.qti.hardware.vibratorOL.impl",
-        "vendor.qti.hardware.vibratorCL.impl",
         "vendor.qti.hardware.vibratorSel.impl",
     ],
     export_include_dirs: ["include"],
