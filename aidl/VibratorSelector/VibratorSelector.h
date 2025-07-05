@@ -49,7 +49,6 @@ typedef enum {
 
 typedef enum {
     VIB_TYPE_OL,
-    VIB_TYPE_CL,
 } vibrator_type;
 
 typedef struct haptics_policy_xml_data {
