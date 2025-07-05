@@ -1,0 +1,20 @@
+COMMON_CFLAGS = ["-Wall"]
+COMMON_CFLAGS += ["-Werror"]
+
+cc_library_shared {
+    name: "vendor.qti.hardware.vibratorCL.impl",
+    cflags: COMMON_CFLAGS,
+    vendor: true,
+    srcs: ["Vibrator.cpp"],
+    include_dirs: ["hardware/qcom-caf/sm8650/audio/pal/inc",
+                   "hardware/qcom-caf/sm8650/audio/graphservices/ar_osal/api",
+                   "hardware/qcom-caf/sm8650/audio/graphservices/spf/api/apm",
+                   "hardware/qcom-caf/sm8650/audio/graphservices/spf/api/ar_utils",
+                   "hardware/qcom-caf/sm8650/audio/graphservices/spf/api/modules"],
+
+    shared_libs: [
+        "android.hardware.vibrator-V2-ndk",
+        "libbinder_ndk",
+        "liblog",
+    ],
+}
