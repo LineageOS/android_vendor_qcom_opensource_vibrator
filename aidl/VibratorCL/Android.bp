@@ -6,17 +6,24 @@ cc_library_shared {
     cflags: COMMON_CFLAGS,
     vendor: true,
     srcs: ["Vibrator.cpp"],
-    include_dirs: ["vendor/qcom/opensource/pal/inc",
-                   "vendor/qcom/proprietary/args/"],
-    header_libs: [
-        "libspf-headers",
-        "libarosal_headers",
-    ],
+    //TODO use header_libs + select instead
+    include_dirs: ["hardware/qcom-caf/sm8750/audio/pal/inc",
+                   "hardware/qcom-caf/sm8750/audio/graphservices/ar_osal/api",
+                   "hardware/qcom-caf/sm8750/audio/graphservices/spf/api/apm",
+                   "hardware/qcom-caf/sm8750/audio/graphservices/spf/api/ar_utils",
+                   "hardware/qcom-caf/sm8750/audio/graphservices/spf/api/modules"],
+    //TODO these are in Android.mk
+    //header_libs: [
+    //    "libspf-headers",
+    //    "libarosal_headers",
+    //],
 
     shared_libs: [
         "android.hardware.vibrator-V2-ndk",
         "libbinder_ndk",
         "liblog",
-        "libpalclient",
-    ],
+    ] + select(soong_config_variable("qti_vibrator", "libpalclient_namespace"), {
+        any @ value: ["//" + value + ":libpalclient"],
+        default: [],
+    }),
 }

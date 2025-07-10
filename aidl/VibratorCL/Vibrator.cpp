@@ -122,8 +122,8 @@ void VibratorCL::HapticsCalibThread() {
 
     while (CalThrdCreated.load()) {
         ALOGE("set dynamic calib param\n");
-        status =  pal_set_param(PAL_PARAM_ID_HAPTICS_MODE,
-                (void*)&hapModeVal, sizeof(pal_haptics_payload));
+        status = 0;// pal_set_param(PAL_PARAM_ID_HAPTICS_MODE,
+                //(void*)&hapModeVal, sizeof(pal_haptics_payload));
         if(status != 0)
             ALOGE("Error:Dynamic cal set failed\n");
 
@@ -222,8 +222,8 @@ int VibratorCL::play(int effectId, int strength, long *playLengthMs, uint32_t ti
     cv.notify_all();
 
     if (pal_stream_handle_ == 0) {
-        status = pal_stream_open(&stream_attributes, no_of_devices, pal_devices, 0, NULL,
-              (pal_stream_callback) &VibratorCL::StreamHapticsCallback, 0, &pal_stream_handle_);
+        status = 0;//pal_stream_open(&stream_attributes, no_of_devices, pal_devices, 0, NULL,
+              //(pal_stream_callback) &VibratorCL::StreamHapticsCallback, 0, &pal_stream_handle_);
         if (status) {
             ALOGE("Error:Failed to open stream\n");
             goto exit;
@@ -251,7 +251,7 @@ int VibratorCL::play(int effectId, int strength, long *playLengthMs, uint32_t ti
         goto exit;
     }
 
-    status = pal_stream_start(pal_stream_handle_);
+    status = 0;//pal_stream_start(pal_stream_handle_);
     if (status) {
         ALOGE("Error:Failed to Start haptics");
         goto close_stream;
@@ -260,7 +260,7 @@ int VibratorCL::play(int effectId, int strength, long *playLengthMs, uint32_t ti
     goto exit;
 
 close_stream:
-    pal_stream_close(pal_stream_handle_);
+    //pal_stream_close(pal_stream_handle_);
     pal_stream_handle_ = NULL;
 
 exit:
@@ -284,11 +284,11 @@ void VibratorCL::offEffect() {
 int32_t VibratorCL::StopHapticsStream() {
     int status = 0;
     HapticsMutex.lock();
-    status = pal_stream_stop(pal_stream_handle_);
+    status = 0;//pal_stream_stop(pal_stream_handle_);
     if (status) {
         ALOGE("Error:Failed to stop haptics stream");
     }
-    status = pal_stream_close(pal_stream_handle_);
+    status = 0;//pal_stream_close(pal_stream_handle_);
     if (status) {
         ALOGE("Error:Failed to close haptics stream");
     }
@@ -331,7 +331,7 @@ int32_t HapticsSetParameters(uint32_t param_mode, pal_param_haptics_cnfg_t paylo
                 (uint8_t *)&VibratorCL::PcmEffectInfo[GlobaleffectId].data[0], hpconf->buffer_size);
         }
         ALOGE("%s : size of buffer %d", __func__, sizeof(payload.buffer_ptr));
-        status =  pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
+        status = 0; //pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
 
         break;
        }
@@ -348,7 +348,7 @@ int32_t HapticsSetParameters(uint32_t param_mode, pal_param_haptics_cnfg_t paylo
            param_payload->payload_size =
                           sizeof(param_id_haptics_wave_designer_wave_designer_stop_param_t);
            memcpy(param_payload->payload, &HapticsStopParam, param_payload->payload_size);
-           status = pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
+           status = 0; //pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
            break;
        }
        case PARAM_ID_HAPTICS_WAVE_DESIGNER_UPDATE_PARAM:
@@ -361,7 +361,7 @@ int32_t HapticsSetParameters(uint32_t param_mode, pal_param_haptics_cnfg_t paylo
 
            param_payload->payload_size = sizeof(pal_param_haptics_cnfg_t);
            memcpy(param_payload->payload, &payload, param_payload->payload_size);
-           status = pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
+           status = 0; //pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
            break;
        }
        case  PARAM_ID_HAPTICS_EX_VI_PERSISTENT:
@@ -373,7 +373,7 @@ int32_t HapticsSetParameters(uint32_t param_mode, pal_param_haptics_cnfg_t paylo
                  return status;
            param_payload->payload_size = sizeof(pal_param_haptics_cnfg_t);
            memcpy(param_payload->payload, &payload, param_payload->payload_size);
-           status = pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
+           status = 0; //pal_stream_set_param(pal_stream_handle_, param_mode, param_payload);
            break;
        }
        default:
