@@ -4,7 +4,10 @@ Common_CFlags += ["-Werror"]
 cc_library_shared {
     name: "vendor.qti.hardware.vibrator.impl",
     vendor: true,
-    cflags: Common_CFlags,
+    cflags: Common_CFlags + select(soong_config_variable("qti_vibrator", "use_libpalclient"), {
+        "true": ["-DUSE_LIBPALCLIENT"],
+        default: [],
+    }),
     srcs: [
         "Vibrator.cpp",
     ],
@@ -15,9 +18,11 @@ cc_library_shared {
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
         "vendor.qti.hardware.vibratorOL.impl",
-        "vendor.qti.hardware.vibratorCL.impl",
         "vendor.qti.hardware.vibratorSel.impl",
-    ],
+    ] + select(soong_config_variable("qti_vibrator", "use_libpalclient"), {
+        "true": ["vendor.qti.hardware.vibratorCL.impl"],
+        default: [],
+    }),
     export_include_dirs: ["include"],
     include_dirs: [
         "external/expat/lib",
