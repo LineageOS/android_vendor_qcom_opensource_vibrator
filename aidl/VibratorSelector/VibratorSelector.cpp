@@ -196,23 +196,29 @@ void VibratorSelector::process_xml_info(haptics_policy_xml_data *data,
     }
 
     if (data->hapticstag == TAG_HAPTICS_PERFORM_API) {
-       if (!strcmp(tag_name, "effect_id")) {
-            int j = 0;
-            int data_len = strlen(data->data_buf);
-            while (j < data_len) {
-                effectIDPerformConfig.push_back(atoi(&data->data_buf[j]));
-                for (; j < data_len; j++) {
-                    if (data->data_buf[j] == ',') {
-                        j = j + 1;
-                        break;
+        if (!strcmp(tag_name, "effect_id")) {
+            std::string effect_ids_str(data->data_buf);
+            if (effect_ids_str == "-1") {
+                effectIDPerformConfig.push_back(-1);
+                ALOGI("Effect ID: -1, defaulting to OL for all effects");
+            } else {
+                int j = 0;
+                int data_len = strlen(data->data_buf);
+                while (j < data_len) {
+                    effectIDPerformConfig.push_back(atoi(&data->data_buf[j]));
+                    for (; j < data_len; j++) {
+                        if (data->data_buf[j] == ',') {
+                            j = j + 1;
+                            break;
+                        }
                     }
                 }
-            }
 
-            for (int i = 0; i < effectIDPerformConfig.size(); i++) {
-                ALOGI("Effect ID: %d", effectIDPerformConfig[i]);
+                for (int i = 0; i < effectIDPerformConfig.size(); i++) {
+                    ALOGI("Effect ID: %d", effectIDPerformConfig[i]);
+                }
             }
-       }
+        }
     }
 
     if (data->hapticstag == TAG_HAPTICS_COMPOSE_API) {
@@ -249,14 +255,16 @@ vibrator_type VibratorSelector::getVibForOnApi(int32_t timeout)
 
 vibrator_type VibratorSelector::getVibForPerformApi(int effect_id)
 {
-    vibrator_type vibType = VIB_TYPE_OL;
+    if (!effectIDPerformConfig.empty() && effectIDPerformConfig[0] == -1) {
+        return VIB_TYPE_OL;
+    }
 
     if (std::find(effectIDPerformConfig.begin(), effectIDPerformConfig.end(),
         effect_id) == effectIDPerformConfig.end()) {
-            vibType = VIB_TYPE_CL;
+            return VIB_TYPE_CL;
     }
 
-    return vibType;
+    return VIB_TYPE_OL;
 }
 
 vibrator_type VibratorSelector::getVibForComposeApi()
