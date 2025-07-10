@@ -16,7 +16,7 @@ PRODUCT_PACKAGES += $(QTI_VIBRATOR_HAL_SERVICE)
 PRODUCT_COPY_FILES += \
       vendor/qcom/opensource/vibrator/excluded-input-devices.xml:vendor/etc/excluded-input-devices.xml
 
-PRODUCT_COPY_FILES += \
-      vendor/qcom/opensource/vibrator/aidl/HapticsPolicy.xml:vendor/etc/HapticsPolicy.xml
+PRODUCT_PACKAGES += \
+      HapticsPolicy.xml
 
 endif
