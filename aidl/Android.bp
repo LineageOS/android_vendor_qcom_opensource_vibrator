@@ -7,6 +7,10 @@ cc_library_shared {
     cflags: Common_CFlags + select(soong_config_variable("qti_vibrator", "use_libpalclient"), {
         true: ["-DUSE_LIBPALCLIENT"],
         default: [],
+    })
+    + select(soong_config_variable("qti_vibrator", "use_primitive_effect_stream"), {
+        true: ["-DUSE_PRIMITIVE_EFFECT_STREAM"],
+        default: [],
     }),
     srcs: [
         "Vibrator.cpp",

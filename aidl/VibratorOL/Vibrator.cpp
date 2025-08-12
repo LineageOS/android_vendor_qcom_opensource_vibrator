@@ -379,11 +379,29 @@ int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLen
     }
 
     primitiveId |= PRIMITIVE_ID_MASK;
+
+#ifdef USE_PRIMITIVE_EFFECT_STREAM
+    // Custom behavior to exaggerate perceived change in amplitude on FIFO
+    // effect primitive implementation, and handle common minimum
+    if (amplitude > 0.882)
+	    amplitude = 0.882;
+
+    tmp = (uint8_t)(powf(amplitude, 2.0f) * 0xff);
+    mCurrMagnitude = tmp * LIGHT_MAGNITUDE / 255;
+    mCurrMagnitude += 0x800;
+    const struct effect_stream *stream = get_effect_stream(primitiveId);
+    if (!stream) {
+        ALOGE("No FIFO effect for primitive id %d", primitiveId);
+        return -1;
+    }
+    ret = play(stream->effect_id, INVALID_VALUE, playLengthMs);
+#else
     tmp = (uint8_t)(amplitude * 0xff);
     mCurrMagnitude = tmp * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE) / 255;
     mCurrMagnitude += LIGHT_MAGNITUDE;
 
     ret = play(primitiveId, INVALID_VALUE, playLengthMs);
+#endif
     if (ret != 0)
         ALOGE("Failed to play primitive %d", primitiveId);
 
@@ -760,6 +778,20 @@ ndk::ScopedAStatus VibratorOL::getSupportedPrimitives(std::vector<CompositePrimi
 }
 
 static int getPrimitiveDurationFromSysfs(uint32_t primitive_id, int32_t* durationMs) {
+#ifdef USE_PRIMITIVE_EFFECT_STREAM
+    if (!durationMs)
+        return -1;
+
+    primitive_id |= PRIMITIVE_ID_MASK;
+    const struct effect_stream *stream = get_effect_stream(primitive_id);
+    if (stream && stream->play_rate_hz > 0) {
+        *durationMs = ((stream->length * 1000) / stream->play_rate_hz) + 1;
+        return 0;
+    } else {
+        *durationMs = 0;
+        return -1;
+    }
+#else
     int count = 0;
     int fd = 0;
     int ret = 0;
@@ -818,6 +850,7 @@ close_fd:
     }
 
     return ret;
+#endif
 }
 
 ndk::ScopedAStatus VibratorOL::getPrimitiveDuration(CompositePrimitive primitive,
