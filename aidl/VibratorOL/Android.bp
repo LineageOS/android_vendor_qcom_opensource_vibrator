@@ -2,7 +2,7 @@ cc_library_shared {
     name: "vendor.qti.hardware.vibratorOL.impl",
     vendor: true,
     cflags: Common_CFlags + select(soong_config_variable("qti_vibrator", "use_effect_stream"), {
-        "true": ["-DUSE_EFFECT_STREAM"],
+        true: ["-DUSE_EFFECT_STREAM"],
         default: [],
     }),
     srcs: [
