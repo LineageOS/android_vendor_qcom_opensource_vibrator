@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8950ca91_902398e7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 32253
+      },
+      "writtenOn": "2025-12-14T21:13:13Z",
+      "side": 1,
+      "message": "Fine on nubia sm8650",
+      "revId": "411ec49027fd912790860971dc3a75f7154166c6",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
