@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dda725f5_c6edf3c9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 30766
+      },
+      "writtenOn": "2026-01-22T11:58:34Z",
+      "side": 1,
+      "message": "modern xiaomis use sih688x which shows up as si_haptic",
+      "revId": "7223b6c5e800394b8e542e99ce729f08bca757a2",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
