@@ -16,6 +16,24 @@
       "message": "In last few days, I\u0027ve faced the same error with veux",
       "revId": "d7f41836203a557a3b427091f875cad4a3544fc5",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a2f87dce_a6552bc2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 35591
+      },
+      "writtenOn": "2026-04-22T15:45:30Z",
+      "side": 1,
+      "message": "Altho this change may still be picked, it\u0027s been fixed in dt directly through this : https://github.com/Evolution-X-Devices/device_xiaomi_veux/commit/2123cb783dd88cf7645dc81fd56be34a2438bf0f",
+      "parentUuid": "965af3e0_acf2257a",
+      "revId": "d7f41836203a557a3b427091f875cad4a3544fc5",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
