@@ -71,6 +71,7 @@ namespace vibrator {
 #define MSM_CPU_TARO            457
 #define MSM_CPU_TARO_LTE        552
 #define MSM_CPU_KALAMA          519
+#define QCS_CPU_KALAMAP         603
 #define MSM_CPU_PINEAPPLE       557
 #define MSM_CPU_SUN             618
 
@@ -179,6 +180,7 @@ InputFFDevice::InputFFDevice()
             case MSM_CPU_CAPE:
             case APQ_CPU_CAPE:
             case MSM_CPU_KALAMA:
+            case QCS_CPU_KALAMAP:
             case MSM_CPU_PINEAPPLE:
             case MSM_CPU_SUN:
                 mSupportExternalControl = true;
