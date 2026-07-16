@@ -333,8 +333,7 @@ int InputFFDevice::setAmplitude(uint8_t amplitude) {
     if (!isPresent())
         return 0;
 
-    tmp = amplitude * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE) / 255;
-    tmp += LIGHT_MAGNITUDE;
+    tmp = amplitude * STRONG_MAGNITUDE / 255;
     ie.type = EV_FF;
     ie.code = FF_GAIN;
     ie.value = tmp;
