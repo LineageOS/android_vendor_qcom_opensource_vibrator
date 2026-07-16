@@ -326,15 +326,15 @@ int InputFFDevice::off() {
 }
 
 int InputFFDevice::setAmplitude(uint8_t amplitude) {
-    int tmp, ret;
+    int32_t tmp;
+    int ret;
     struct input_event ie;
 
     /* For QMAA compliance, return OK even if vibrator device doesn't exist */
     if (!isPresent())
         return 0;
 
-    tmp = amplitude * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE) / 255;
-    tmp += LIGHT_MAGNITUDE;
+    tmp = amplitude * STRONG_MAGNITUDE / 255;
     ie.type = EV_FF;
     ie.code = FF_GAIN;
     ie.value = tmp;
@@ -373,7 +373,7 @@ int InputFFDevice::playEffect(int effectId, EffectStrength es, long *playLengthM
 }
 
 int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLengthMs) {
-    int8_t tmp;
+    int32_t tmp;
     int ret = 0;
 
     if (primitiveId > MAX_PATTERN_ID) {
@@ -382,9 +382,8 @@ int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLen
     }
 
     primitiveId |= PRIMITIVE_ID_MASK;
-    tmp = (uint8_t)(amplitude * 0xff);
-    mCurrMagnitude = tmp * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE) / 255;
-    mCurrMagnitude += LIGHT_MAGNITUDE;
+    tmp = (uint8_t)(amplitude * 0xff) * STRONG_MAGNITUDE / 255;
+    mCurrMagnitude = tmp;
 
     ret = play(primitiveId, INVALID_VALUE, playLengthMs);
     if (ret != 0)
