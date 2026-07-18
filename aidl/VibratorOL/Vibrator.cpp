@@ -571,8 +571,14 @@ ndk::ScopedAStatus VibratorOL::getCapabilities(int32_t* _aidl_return) {
         *_aidl_return |= IVibrator::CAP_PERFORM_CALLBACK;
         int32_t primitiveDuration = 0;
         uint32_t primitiveId = static_cast<uint32_t>(CompositePrimitive::CLICK);
+#ifndef USE_EFFECT_STREAM
         getPrimitiveDurationFromSysfs(primitiveId, &primitiveDuration);
         if (primitiveDuration != 0)
+#else
+        std::vector<CompositePrimitive> supportedPrimitives;
+        getSupportedPrimitives(&supportedPrimitives);
+        if (supportedPrimitives.size() > 0)
+#endif
             *_aidl_return |= IVibrator::CAP_COMPOSE_EFFECTS;
     }
     if (ff.mSupportExternalControl)
@@ -751,6 +757,7 @@ ndk::ScopedAStatus VibratorOL::getCompositionSizeMax(int32_t* maxSize) {
 }
 
 ndk::ScopedAStatus VibratorOL::getSupportedPrimitives(std::vector<CompositePrimitive>* supported) {
+#ifndef USE_EFFECT_STREAM
     *supported =  {
         CompositePrimitive::NOOP,   CompositePrimitive::CLICK,
         CompositePrimitive::THUD,   CompositePrimitive::SPIN,
@@ -758,6 +765,18 @@ ndk::ScopedAStatus VibratorOL::getSupportedPrimitives(std::vector<CompositePrimi
         CompositePrimitive::QUICK_FALL, CompositePrimitive::LIGHT_TICK,
         CompositePrimitive::LOW_TICK,
     };
+#else
+    for (int32_t primitiveId = static_cast<int32_t>(CompositePrimitive::NOOP);
+         primitiveId <= static_cast<int32_t>(CompositePrimitive::LOW_TICK);
+         primitiveId++) {
+        const struct effect_stream *stream;
+        int32_t effectId  = primitiveId | PRIMITIVE_ID_MASK;
+
+        stream = get_effect_stream(effectId);
+        if (stream)
+            supported->push_back(static_cast<CompositePrimitive>(primitiveId));
+    }
+#endif
     return ndk::ScopedAStatus::ok();
 }
 
