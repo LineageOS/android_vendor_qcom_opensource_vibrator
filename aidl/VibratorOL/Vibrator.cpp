@@ -616,6 +616,17 @@ ndk::ScopedAStatus VibratorOL::on(int32_t timeoutMs,
                                 const std::shared_ptr<IVibratorCallback>& callback) {
     int ret;
 
+    if (ledVib.mDetected) {
+        // ERM/LDO motors need a minimum energization time to overcome
+        // mechanical inertia and produce perceptible vibration. Short pulses
+        // (fallback for prebaked effects like TICK/CLICK, typically 10-20ms)
+        // result in "silent" vibration without this floor.
+        const int32_t kMinLdoTimeoutMs = 50;
+        if (timeoutMs < kMinLdoTimeoutMs) {
+            timeoutMs = kMinLdoTimeoutMs;
+        }
+    }
+
     ALOGD("Vibrator on for timeoutMs: %d", timeoutMs);
     if (ledVib.mDetected)
         ret = ledVib.on(timeoutMs);
