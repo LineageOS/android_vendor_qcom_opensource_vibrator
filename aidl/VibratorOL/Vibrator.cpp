@@ -398,6 +398,7 @@ LedVibratorDevice::LedVibratorDevice() {
     int fd;
 
     mDetected = false;
+    mIsLdo = false;
 
     snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "activate");
     fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
@@ -407,6 +408,9 @@ LedVibratorDevice::LedVibratorDevice() {
     }
 
     mDetected = true;
+
+    snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "device/driver");
+    mIsLdo = realpath(devicename, devicename) && strstr(devicename, "/qcom,qpnp-vibrator-ldo");
 }
 
 int LedVibratorDevice::write_value(const char *file, const char *value) {
@@ -615,6 +619,11 @@ ndk::ScopedAStatus VibratorOL::off() {
 ndk::ScopedAStatus VibratorOL::on(int32_t timeoutMs,
                                 const std::shared_ptr<IVibratorCallback>& callback) {
     int ret;
+
+    if (ledVib.mIsLdo) {
+        // See QPNP_VIB_MIN_PLAY_MS, QPNP_VIB_MAX_PLAY_MS in leds-qpnp-vibrator-ldo.c
+        timeoutMs = std::clamp(timeoutMs, 50, 15000);
+    }
 
     ALOGD("Vibrator on for timeoutMs: %d", timeoutMs);
     if (ledVib.mDetected)
