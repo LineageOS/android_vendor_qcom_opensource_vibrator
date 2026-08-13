@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78fb9028_93f6b4a4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 32253
+      },
+      "writtenOn": "2026-08-13T16:35:35Z",
+      "side": 1,
+      "message": "Shouldn\u0027t hurt to merge this now\n\n```\n01-05 11:41:33.193  1124  1124 I vendor.qti.vibratorOL: drv260x:haptics is detected at /dev/input/event1\n```",
+      "revId": "afe7232f86f34e7c5d1f14fccaed4fe7088daf42",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
