@@ -16,6 +16,24 @@
       "message": "is this change is needed in xiaomi kunzite?",
       "revId": "ad25648d2561e08b76aef25fee45a2ef0e339cd3",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7141147b_b67eaf02",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36241
+      },
+      "writtenOn": "2026-08-20T01:21:41Z",
+      "side": 1,
+      "message": "this should also work on devices using qpnp-vibrator-ld",
+      "parentUuid": "4dfd07ef_08289bcc",
+      "revId": "ad25648d2561e08b76aef25fee45a2ef0e339cd3",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
