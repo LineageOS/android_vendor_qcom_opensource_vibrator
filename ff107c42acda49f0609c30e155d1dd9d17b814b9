@@ -70,6 +70,23 @@
       "parentUuid": "f2edc19d_4c999e21",
       "revId": "ff107c42acda49f0609c30e155d1dd9d17b814b9",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c66f2a5_43a414fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 37345
+      },
+      "writtenOn": "2026-08-21T12:38:40Z",
+      "side": 1,
+      "message": "This change is needed in my moto sm8450-6.6 device also",
+      "revId": "ff107c42acda49f0609c30e155d1dd9d17b814b9",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ],
   "submitRequirementResults": [
