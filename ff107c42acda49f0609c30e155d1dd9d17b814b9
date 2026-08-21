@@ -16,6 +16,24 @@
       "message": "hi, i reworked this patch, you ok with my changes?",
       "revId": "ff107c42acda49f0609c30e155d1dd9d17b814b9",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "16333d0e_a5a97340",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 36241
+      },
+      "writtenOn": "2026-08-21T01:16:09Z",
+      "side": 1,
+      "message": "no problem sir, if that indeed makes things better",
+      "parentUuid": "f5d006e6_4d9c060f",
+      "revId": "ff107c42acda49f0609c30e155d1dd9d17b814b9",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
