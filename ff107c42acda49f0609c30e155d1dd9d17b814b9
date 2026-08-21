@@ -34,6 +34,24 @@
       "parentUuid": "f5d006e6_4d9c060f",
       "revId": "ff107c42acda49f0609c30e155d1dd9d17b814b9",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f2edc19d_4c999e21",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 10067
+      },
+      "writtenOn": "2026-08-21T12:26:54Z",
+      "side": 1,
+      "message": "did you verify current PS still works for you?",
+      "parentUuid": "16333d0e_a5a97340",
+      "revId": "ff107c42acda49f0609c30e155d1dd9d17b814b9",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
