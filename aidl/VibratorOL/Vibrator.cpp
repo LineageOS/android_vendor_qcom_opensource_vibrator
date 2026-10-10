@@ -665,12 +665,14 @@ ndk::ScopedAStatus VibratorOL::perform(Effect effect, EffectStrength es, const s
              (effect > Effect::RINGTONE_15))
              return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
     }
-#ifndef USE_EFFECT_STREAM
     else {
+#ifndef USE_EFFECT_STREAM
          if (effect < Effect::CLICK || effect > Effect::HEAVY_CLICK)
+#else
+         if (!get_effect_stream(static_cast<int32_t>(effect)))
+#endif
              return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
     }
-#endif
 
     if (es != EffectStrength::LIGHT && es != EffectStrength::MEDIUM && es != EffectStrength::STRONG)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
