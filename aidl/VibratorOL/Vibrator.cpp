@@ -670,6 +670,10 @@ ndk::ScopedAStatus VibratorOL::perform(Effect effect, EffectStrength es, const s
          if (effect < Effect::CLICK || effect > Effect::HEAVY_CLICK)
              return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
     }
+#else
+    else if (!get_effect_stream(static_cast<int32_t>(effect))) {
+         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
+    }
 #endif
 
     if (es != EffectStrength::LIGHT && es != EffectStrength::MEDIUM && es != EffectStrength::STRONG)
