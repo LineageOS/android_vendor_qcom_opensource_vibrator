@@ -4,6 +4,9 @@ cc_library_shared {
     cflags: Common_CFlags + select(soong_config_variable("qti_vibrator", "use_effect_stream"), {
         true: ["-DUSE_EFFECT_STREAM"],
         default: [],
+    }) + select(soong_config_variable("qti_vibrator", "support_external_control"), {
+        false: ["-DSUPPORT_EXTERNAL_CONTROL=false"],
+        default: ["-DSUPPORT_EXTERNAL_CONTROL=true"],
     }),
     srcs: [
         "Vibrator.cpp",
