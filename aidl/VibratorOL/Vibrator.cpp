@@ -74,6 +74,7 @@ namespace vibrator {
 #define QCS_CPU_KALAMAP         603
 #define MSM_CPU_PINEAPPLE       557
 #define MSM_CPU_SUN             618
+#define MSM_CPU_VOLCANO         636
 #define MSM_CPU_CANOE           660
 
 #define test_bit(bit, array)    ((array)[(bit)/8] & (1<<((bit)%8)))
@@ -91,14 +92,12 @@ enum composeEvent {
 InputFFDevice::InputFFDevice()
 {
     DIR *dp;
-    FILE *fp = NULL;
     struct dirent *dir;
     uint8_t ffBitmask[FF_CNT / 8];
     char devicename[PATH_MAX];
     const char *INPUT_DIR = "/dev/input/";
     char name[NAME_BUF_SIZE];
     int fd, ret;
-    int soc = property_get_int32("ro.vendor.qti.soc_id", -1);
 
     mVibraFd = INVALID_VALUE;
     mSupportGain = false;
@@ -165,33 +164,7 @@ InputFFDevice::InputFFDevice()
                 mSupportEffects = true;
             if (test_bit(FF_GAIN, ffBitmask))
                 mSupportGain = true;
-
-            if (soc <= 0 && (fp = fopen("/sys/devices/soc0/soc_id", "r")) != NULL) {
-                fscanf(fp, "%u", &soc);
-                fclose(fp);
-            }
-            switch (soc) {
-            case MSM_CPU_LAHAINA:
-            case APQ_CPU_LAHAINA:
-            case MSM_CPU_SHIMA:
-            case MSM_CPU_SM8325:
-            case APQ_CPU_SM8325P:
-            case MSM_CPU_TARO:
-            case MSM_CPU_TARO_LTE:
-            case MSM_CPU_YUPIK:
-            case MSM_CPU_CAPE:
-            case APQ_CPU_CAPE:
-            case MSM_CPU_KALAMA:
-            case QCS_CPU_KALAMAP:
-            case MSM_CPU_PINEAPPLE:
-            case MSM_CPU_SUN:
-            case MSM_CPU_CANOE:
-                mSupportExternalControl = true;
-                break;
-            default:
-                mSupportExternalControl = false;
-                break;
-            }
+            mSupportExternalControl = SUPPORT_EXTERNAL_CONTROL;
             break;
         }
 
