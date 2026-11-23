@@ -40,6 +40,14 @@
 #include <sys/epoll.h>
 #include <sys/poll.h>
 #include <thread>
+#ifdef USE_RICHTAP_RTP
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <algorithm>
+#include <atomic>
+#include <cmath>
+#include <string>
+#endif
 
 #include "Vibrator.h"
 #ifdef USE_EFFECT_STREAM
@@ -88,6 +96,43 @@ enum composeEvent {
     STOP_COMPOSE = 0,
 };
 
+#ifdef USE_RICHTAP_RTP
+#ifndef RICHTAP_DEVICE
+#define RICHTAP_DEVICE          "/dev/awinic_haptic"
+#endif
+#ifndef RICHTAP_ACTIVATE_NODE
+#define RICHTAP_ACTIVATE_NODE   "activate"
+#endif
+#ifndef RICHTAP_DURATION_NODE
+#define RICHTAP_DURATION_NODE   "duration"
+#endif
+#define RICHTAP_IOCTL_GROUP     0x52
+#define RICHTAP_GET_HWINFO      _IO(RICHTAP_IOCTL_GROUP, 0x03)
+#define RICHTAP_SETTING_GAIN    _IO(RICHTAP_IOCTL_GROUP, 0x05)
+#define RICHTAP_STREAM_MODE     _IO(RICHTAP_IOCTL_GROUP, 0x0A)
+#define RICHTAP_STOP_MODE       _IO(RICHTAP_IOCTL_GROUP, 0x12)
+#define RICHTAP_MAX_GAIN        0x80
+#define RICHTAP_BUF_DATA_SIZE   1000
+#define RICHTAP_BUF_COUNT       16
+#define RICHTAP_BUF_VALID       0x55
+#define RICHTAP_RATE_HZ         24000
+#define RICHTAP_MAX_SAMPLES     (RICHTAP_BUF_DATA_SIZE * RICHTAP_BUF_COUNT)
+/* Time the driver takes to wake the chip and enter RTP mode */
+#define RICHTAP_START_MS        20
+
+struct richtap_buf {
+    uint8_t status;
+    uint8_t bit;
+    int16_t length;
+    uint32_t reserve;
+    uint64_t kernel_next;
+    uint64_t user_next;
+    int8_t data[RICHTAP_BUF_DATA_SIZE];
+} __attribute__((packed));
+
+#define RICHTAP_MMAP_SIZE       (sizeof(struct richtap_buf) * RICHTAP_BUF_COUNT)
+#endif
+
 InputFFDevice::InputFFDevice()
 {
     DIR *dp;
@@ -107,6 +152,11 @@ InputFFDevice::InputFFDevice()
     mCurrAppId = INVALID_VALUE;
     mCurrMagnitude = 0x7fff;
     mInExternalControl = false;
+#ifdef USE_RICHTAP_RTP
+    mRtpFd = INVALID_VALUE;
+    mRtpBufs = NULL;
+    mRtpPlaying = false;
+#endif
 
     dp = opendir(INPUT_DIR);
     if (!dp) {
@@ -199,9 +249,189 @@ InputFFDevice::InputFFDevice()
     }
 
     closedir(dp);
+
+#ifdef USE_RICHTAP_RTP
+    if (mVibraFd == INVALID_VALUE)
+        initRichtap();
+#endif
 }
 
+#ifdef USE_RICHTAP_RTP
+static int writeLedNode(const char *node, int value) {
+    char path[PATH_MAX];
+    std::string buf = std::to_string(value);
+    int fd, ret = 0;
+
+    snprintf(path, sizeof(path), "%s/%s", LED_DEVICE, node);
+    fd = TEMP_FAILURE_RETRY(open(path, O_WRONLY | O_CLOEXEC));
+    if (fd < 0) {
+        ALOGE("open %s failed, errno = %d", path, errno);
+        return -errno;
+    }
+
+    if (TEMP_FAILURE_RETRY(write(fd, buf.c_str(), buf.size())) != (ssize_t)buf.size()) {
+        ALOGE("write %s failed, errno = %d", path, errno);
+        ret = -EIO;
+    }
+
+    close(fd);
+    return ret;
+}
+
+static int magnitudeToGain(int16_t magnitude) {
+    return std::max(1, magnitude * RICHTAP_MAX_GAIN / STRONG_MAGNITUDE);
+}
+
+void InputFFDevice::initRichtap() {
+    uint32_t hwInfo;
+    int fd;
+
+    fd = TEMP_FAILURE_RETRY(open(RICHTAP_DEVICE, O_RDWR | O_CLOEXEC));
+    if (fd < 0) {
+        ALOGE("open %s failed, errno = %d", RICHTAP_DEVICE, errno);
+        return;
+    }
+
+    if (TEMP_FAILURE_RETRY(ioctl(fd, RICHTAP_GET_HWINFO, &hwInfo)) == -1) {
+        ALOGE("ioctl RICHTAP_GET_HWINFO failed, errno = %d", errno);
+        close(fd);
+        return;
+    }
+
+    mRtpBufs = mmap(NULL, RICHTAP_MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (mRtpBufs == MAP_FAILED) {
+        ALOGE("mmap %s failed, errno = %d", RICHTAP_DEVICE, errno);
+        mRtpBufs = NULL;
+        close(fd);
+        return;
+    }
+
+    ALOGI("%s is detected", RICHTAP_DEVICE);
+    mRtpFd = fd;
+    mSupportEffects = true;
+    mSupportGain = true;
+}
+
+int InputFFDevice::playRichtap(int effectId, uint32_t timeoutMs, long *playLengthMs) {
+    const struct effect_stream *stream;
+    int ret;
+
+    if (timeoutMs == 0) {
+        if (mRtpPlaying) {
+            TEMP_FAILURE_RETRY(ioctl(mRtpFd, RICHTAP_STOP_MODE, 0));
+            mRtpPlaying = false;
+        }
+        return writeLedNode(RICHTAP_ACTIVATE_NODE, 0);
+    }
+
+    if (effectId == INVALID_VALUE) {
+        ret = writeLedNode("gain", magnitudeToGain(mCurrMagnitude));
+        if (ret == 0)
+            ret = writeLedNode(RICHTAP_DURATION_NODE, timeoutMs);
+        if (ret == 0)
+            ret = writeLedNode(RICHTAP_ACTIVATE_NODE, 1);
+        return ret;
+    }
+
+    stream = get_effect_stream(effectId);
+    if (stream == NULL)
+        return -EINVAL;
+
+    std::vector<float> samples(std::min<uint32_t>(stream->length, RICHTAP_MAX_SAMPLES));
+    for (size_t i = 0; i < samples.size(); i++)
+        samples[i] = stream->data[i] * static_cast<float>(mCurrMagnitude) / STRONG_MAGNITUDE;
+
+    ret = streamRichtap(samples);
+    if (ret == 0 && playLengthMs != NULL)
+        *playLengthMs = ((samples.size() * 1000) / stream->play_rate_hz) + RICHTAP_START_MS;
+
+    return ret;
+}
+
+int InputFFDevice::streamRichtap(const std::vector<float> &samples) {
+    struct richtap_buf *bufs = static_cast<struct richtap_buf *>(mRtpBufs);
+    float peak = 0;
+    int gain;
+
+    /* Scale in hardware so quiet streams keep their full sample resolution */
+    for (float s : samples)
+        peak = std::max(peak, std::fabs(s));
+    gain = std::clamp(static_cast<int>(std::ceil(peak * RICHTAP_MAX_GAIN / INT8_MAX)), 1,
+                      RICHTAP_MAX_GAIN);
+
+    if (mRtpPlaying)
+        TEMP_FAILURE_RETRY(ioctl(mRtpFd, RICHTAP_STOP_MODE, 0));
+
+    TEMP_FAILURE_RETRY(ioctl(mRtpFd, RICHTAP_SETTING_GAIN, gain));
+    if (TEMP_FAILURE_RETRY(ioctl(mRtpFd, RICHTAP_STREAM_MODE, 0)) == -1) {
+        ALOGE("ioctl RICHTAP_STREAM_MODE failed, errno = %d", errno);
+        return -errno;
+    }
+
+    /* The driver stops at the first invalid buffer, so release the first one last */
+    for (int i = (samples.size() - 1) / RICHTAP_BUF_DATA_SIZE; i >= 0; i--) {
+        uint32_t offset = i * RICHTAP_BUF_DATA_SIZE;
+        uint32_t count = std::min<uint32_t>(samples.size() - offset, RICHTAP_BUF_DATA_SIZE);
+
+        for (uint32_t j = 0; j < count; j++) {
+            long v = std::lround(samples[offset + j] * RICHTAP_MAX_GAIN / gain);
+            bufs[i].data[j] = std::clamp<long>(v, INT8_MIN, INT8_MAX);
+        }
+        bufs[i].length = count;
+        std::atomic_thread_fence(std::memory_order_release);
+        bufs[i].status = RICHTAP_BUF_VALID;
+    }
+
+    mRtpPlaying = true;
+    return 0;
+}
+
+int InputFFDevice::playComposition(const std::vector<CompositeEffect> &composite,
+                                   long *playLengthMs) {
+    std::vector<float> samples;
+    int ret;
+
+    if (mRtpFd == INVALID_VALUE)
+        return -ENODEV;
+
+    for (auto &e : composite) {
+        const struct effect_stream *stream =
+                get_effect_stream(static_cast<int>(e.primitive) | PRIMITIVE_ID_MASK);
+
+        if (stream == NULL)
+            return -EINVAL;
+
+        samples.insert(samples.end(), e.delayMs * RICHTAP_RATE_HZ / 1000, 0);
+        for (uint32_t i = 0; i < stream->length; i++)
+            samples.push_back(stream->data[i] * e.scale);
+
+        if (samples.size() > RICHTAP_MAX_SAMPLES)
+            return -E2BIG;
+    }
+
+    if (samples.empty())
+        return -EINVAL;
+
+    mtx.lock();
+    ret = streamRichtap(samples);
+    mtx.unlock();
+
+    if (ret == 0 && playLengthMs != NULL)
+        *playLengthMs = ((samples.size() * 1000) / RICHTAP_RATE_HZ) + RICHTAP_START_MS;
+
+    return ret;
+}
+
+bool InputFFDevice::isRichtap() {
+    return (mRtpFd != INVALID_VALUE);
+}
+#endif
+
 bool InputFFDevice::isPresent() {
+#ifdef USE_RICHTAP_RTP
+    if (mRtpFd != INVALID_VALUE)
+        return true;
+#endif
     return (mVibraFd != INVALID_VALUE);
 }
 
@@ -240,6 +470,14 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
         mtx.unlock();
         return 0;
     }
+
+#ifdef USE_RICHTAP_RTP
+    if (mRtpFd != INVALID_VALUE) {
+        ret = playRichtap(effectId, timeoutMs, playLengthMs);
+        mtx.unlock();
+        return ret;
+    }
+#endif
 
     if (timeoutMs != 0) {
         if (mCurrAppId != INVALID_VALUE) {
@@ -338,6 +576,12 @@ int InputFFDevice::setAmplitude(uint8_t amplitude) {
         return 0;
 
     tmp = amplitude * STRONG_MAGNITUDE / 255;
+#ifdef USE_RICHTAP_RTP
+    if (mRtpFd != INVALID_VALUE) {
+        mCurrMagnitude = tmp;
+        return writeLedNode("gain", magnitudeToGain(mCurrMagnitude));
+    }
+#endif
     ie.type = EV_FF;
     ie.code = FF_GAIN;
     ie.value = tmp;
@@ -513,6 +757,12 @@ VibratorOL::VibratorOL() {
     struct epoll_event ev;
 
     mSupportVISense = is_VI_sense_supported();
+
+#ifdef USE_RICHTAP_RTP
+    /* RichTap devices also expose the LED class nodes, drive them through ff instead */
+    if (ff.isRichtap())
+        ledVib.mDetected = false;
+#endif
 
     epollfd = INVALID_VALUE;
     pipefd[0] = INVALID_VALUE;
@@ -896,6 +1146,14 @@ void VibratorOL::composePlayThread(VibratorOL *vibrator,
     int ret = 0;
 
     ALOGD("start a new thread for composeEffect");
+#ifdef USE_RICHTAP_RTP
+    if (vibrator->ff.playComposition(composite, &playLengthMs) == 0) {
+        nfd = epoll_wait(vibrator->epollfd, &events, 1, playLengthMs);
+        if (nfd > 0 && read(vibrator->pipefd[0], &status, sizeof(int)) > 0 &&
+            status == STOP_COMPOSE)
+            vibrator->ff.off();
+    } else
+#endif
     for (auto& e : composite) {
         if (e.delayMs) {
             nfd = epoll_wait(vibrator->epollfd, &events, 1, e.delayMs);

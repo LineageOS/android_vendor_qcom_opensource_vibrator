@@ -71,6 +71,10 @@ public:
     InputFFDevice();
     int playEffect(int effectId, EffectStrength es, long *playLengthMs);
     int playPrimitive(int primitiveId, float amplitude, long *playLengthMs);
+#ifdef USE_RICHTAP_RTP
+    int playComposition(const std::vector<CompositeEffect> &composite, long *playLengthMs);
+    bool isRichtap();
+#endif
     int on(int32_t timeoutMs);
     int off();
     int setAmplitude(uint8_t amplitude);
@@ -86,6 +90,14 @@ private:
     int16_t mCurrAppId;
     int16_t mCurrMagnitude;
     std::mutex mtx;
+#ifdef USE_RICHTAP_RTP
+    void initRichtap();
+    int playRichtap(int effectId, uint32_t timeoutMs, long *playLengthMs);
+    int streamRichtap(const std::vector<float> &samples);
+    int mRtpFd;
+    bool mRtpPlaying;
+    void *mRtpBufs;
+#endif
 };
 
 class LedVibratorDevice {

@@ -4,6 +4,18 @@ cc_library_shared {
     cflags: Common_CFlags + select(soong_config_variable("qti_vibrator", "use_effect_stream"), {
         true: ["-DUSE_EFFECT_STREAM"],
         default: [],
+    }) + select(soong_config_variable("qti_vibrator", "use_richtap_rtp"), {
+        true: ["-DUSE_RICHTAP_RTP"],
+        default: [],
+    }) + select(soong_config_variable("qti_vibrator", "richtap_device"), {
+        any @ device: ["-DRICHTAP_DEVICE=\"" + device + "\""],
+        default: [],
+    }) + select(soong_config_variable("qti_vibrator", "richtap_activate_node"), {
+        any @ node: ["-DRICHTAP_ACTIVATE_NODE=\"" + node + "\""],
+        default: [],
+    }) + select(soong_config_variable("qti_vibrator", "richtap_duration_node"), {
+        any @ node: ["-DRICHTAP_DURATION_NODE=\"" + node + "\""],
+        default: [],
     }),
     srcs: [
         "Vibrator.cpp",
