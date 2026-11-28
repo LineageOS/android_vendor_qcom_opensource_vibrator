@@ -51,6 +51,42 @@
       "parentUuid": "28f2c6e5_585964eb",
       "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8331a28e_e94a7d86",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 30975
+      },
+      "writtenOn": "2026-11-28T12:32:44Z",
+      "side": 1,
+      "message": "Yes, but this one runs on the QTI HAL instead of the libaacvibrator blob, so it supports full effects and compositions. It\u0027s working fine on all oplus sm8650 devices, so the plan is to move them to it and drop the blob based one",
+      "parentUuid": "ea28aa1f_84f74b3b",
+      "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a122eabe_d81eec40",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 30975
+      },
+      "writtenOn": "2026-11-28T12:32:44Z",
+      "side": 1,
+      "message": "Yes, it\u0027s not a blocker, but I\u0027d like avalon to ship with proper haptics on the initial 24.0 build",
+      "parentUuid": "e1633804_ee1ed516",
+      "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
