@@ -105,6 +105,24 @@
       "parentUuid": "8331a28e_e94a7d86",
       "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "493d9eab_80e34265",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 30975
+      },
+      "writtenOn": "2026-11-28T12:43:30Z",
+      "side": 1,
+      "message": "avalon and lexus are already switched to it in the same topic, and bale is in progress. Once the other oplus devices switch to the QTI one, we can kill the RichTap impl in hardware/oplus",
+      "parentUuid": "59a113d9_580f5301",
+      "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
