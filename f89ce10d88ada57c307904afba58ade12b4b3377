@@ -87,6 +87,24 @@
       "parentUuid": "e1633804_ee1ed516",
       "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "59a113d9_580f5301",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2026-11-28T12:37:42Z",
+      "side": 1,
+      "message": "Well, then maybe the previous impl should be killed?",
+      "parentUuid": "8331a28e_e94a7d86",
+      "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
