@@ -16,6 +16,23 @@
       "message": "can we get this merged? we\u0027re waiting on it to ship avalon on 24.0",
       "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ea28aa1f_84f74b3b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 4550
+      },
+      "writtenOn": "2026-11-28T10:23:22Z",
+      "side": 1,
+      "message": "So yet another richtap implementation?",
+      "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
