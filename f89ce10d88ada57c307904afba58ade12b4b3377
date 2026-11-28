@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "28f2c6e5_585964eb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 30975
+      },
+      "writtenOn": "2026-11-28T06:13:00Z",
+      "side": 1,
+      "message": "can we get this merged? we\u0027re waiting on it to ship avalon on 24.0",
+      "revId": "f89ce10d88ada57c307904afba58ade12b4b3377",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
